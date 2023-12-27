@@ -16,8 +16,8 @@ TEMPLATES = ['*КМД*.xls*']
 def get_data(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
-    if file is None:
-        return None, None
+    if file == '':
+        return None
 
     # Выбераем нужные столбцы, разбивая по словарю
     all_data = excel.get_data_from_sheet(file, HEADERS)

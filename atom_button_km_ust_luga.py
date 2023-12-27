@@ -12,8 +12,8 @@ from data_output.data_in_excel import main as xl
 
 try:
     script, path = argv
-except NameError as _:
-    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 5'
+except:
+    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 4'
 
 
 FAIL_NAME = os.path.join(path, "Акт промежуточной проверки.xlsx")
@@ -122,10 +122,10 @@ def main():
             os.remove(FAIL_NAME)
 
         # # Выполняем сверки
-        # reconciles_documents_kmd_aorpi()
-        # reconciles_documents_jsr_csv()
+        reconciles_documents_kmd_aorpi()
+        reconciles_documents_jsr_csv()
         reconciles_documents_aorpi_qualdoc()
-        # reconciles_documents_kmd_qualdoc()
+        reconciles_documents_kmd_qualdoc()
     except Exception as ex:
         # Настройка конфигурации логирования
         logging.basicConfig(filename=path + '\\Отчет об ошибках.txt', level=logging.ERROR,

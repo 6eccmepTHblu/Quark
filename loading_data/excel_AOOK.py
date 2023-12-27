@@ -17,8 +17,8 @@ HEADERS = {'Пункт': '№ п/п',
 def get_data(path, mask, type_name):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
-    if file is None:
-        return None, None
+    if file == '':
+        return None
 
     # Открываем книгу АООК
     wb = openpyxl.load_workbook(file)

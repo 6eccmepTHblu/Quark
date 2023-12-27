@@ -23,7 +23,7 @@ RESULT = ['не годен',
 def get_data(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
-    if file is None:
+    if file == '':
         return None
 
     # Открываем книгу АООК
