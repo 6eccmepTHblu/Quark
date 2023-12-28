@@ -12,9 +12,7 @@ SHEET_NAME = "АоРПИ_КМД_АООК"
 HEADERS = {'Марка': 'Марка',
            'Наименование': 'Наименование из КМД',
            'Количество': 'Кол-во КМД',
-           'Статус проверки': 'Результат',
-           'АоРПИ Номер из АООК': 'Упоминание в АООК',
-           'АООК Дата': 'Дата АООК'}
+           'Статус проверки': 'Результат'}
 
 def data_output(table, file_name):
     if not table:
@@ -39,7 +37,7 @@ def data_output(table, file_name):
     # Результат
     result_style = styles.RangeStyle(sh, 'Result_' + prefix_style, cell_color=COLORS['Красный'], bold=True)
     result_style.apply_style(r1=2, c1=get_key(HEADERS, 'Статус проверки'), r2=len(table),
-                             c2=get_key(HEADERS, 'АоРПИ Номер из АООК'))
+                             c2=get_key(HEADERS, 'Статус проверки'))
 
     # Общие
     styles.add_filter(sh, row2=len(table), col2=len(HEADERS))
@@ -58,19 +56,6 @@ def data_output(table, file_name):
         ],
         f'AND(ROW()>1, SEARCH("{STATUS["Марка"]}",{col(HEADERS, "Статус проверки")}))': [
             {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Марка", "Количество"])}
-        ],
-        f'AND(ROW()>1, SEARCH("{STATUS["АООК != дата"]}",{col(HEADERS, "АоРПИ Номер из АООК")}))': [
-            {'Цвет': COLORS['Жёлтый'], 'Диапазон': col(HEADERS, ["АоРПИ Номер из АООК", "АоРПИ Номер из АООК"])}
-        ],
-        f'AND(ROW()>1, SEARCH("{STATUS["АООК ="]}",{col(HEADERS, "АоРПИ Номер из АООК")}))': [
-            {'Цвет': COLORS['Зелёный'], 'Диапазон': col(HEADERS, ["АоРПИ Номер из АООК", "АоРПИ Номер из АООК"])}
-        ],
-        f'AND(ROW()>1, SEARCH("{STATUS["АООК !="]}",{col(HEADERS, "АоРПИ Номер из АООК")}))': [
-            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["АоРПИ Номер из АООК",
-                                                                               "АоРПИ Номер из АООК"])}
-        ],
-        f'AND(ROW()>1, SEARCH("{STATUS["АООК < АоРПИ"]}",{col(HEADERS, "АООК Дата")}))': [
-            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["АООК Дата", "АООК Дата"])}
         ]
     }
     uf_color(uf, sh)

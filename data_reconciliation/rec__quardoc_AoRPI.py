@@ -4,11 +4,7 @@ from def_folder.data_normalization import append_value as ap
 STATUS = {'Полное совпадение': 'Полное совпадение',
           'Количество': 'Количество',
           'Наименование': 'Наименование',
-          'Марка': 'Не найдена марка',
-          'Дата из АоРПИ': 'Дата ДК из АоРПИ',
-          'Дата ДК и АоРПИ': 'Дата ДК позже АоРПИ',
-          'Номер из АоРПИ': 'Дата ДК не найдена в АОРПИ',
-          'АоРПИ номер в ДК': 'Номер ДК не найден в АОРПИ',}  # Итоговые статусы проверки
+          'Марка': 'Не найдена марка'}  # Итоговые статусы проверки
 
 
 def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> list:
@@ -70,25 +66,6 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
                 row_quardoc['Расхождения'].append({'Тип': 'Количество',
                                                'Рез': row_izdel['Количество'],
                                                'Преф': 'Количество из АоРПИ: \n'})
-
-            # Дата Качества самом в АоРПИ
-            if len(row_quardoc['Сверка кач. докум.']) != 0:
-                if row_quardoc['Дата отгрузки'] != row_quardoc.setdefault('Дата АоРПИ Отгрузки', ''):
-                    row_quardoc['Статус проверки'] = ap(row_quardoc['Статус проверки'], STATUS['Дата из АоРПИ'])
-                    row_quardoc['Расхождения'].append({'Тип': 'Дата отгрузки',
-                                                   'Рез': row_quardoc['Дата АоРПИ Отгрузки'],
-                                                   'Преф': 'Дата ДК из АоРПИ: \n'})
-
-                # Дата ДК позже АоРПИ
-                elif coll.checks_dates(row_quardoc.setdefault('Дата отгрузки', ''),
-                                       row_quardoc.setdefault('Дата АоРПИ', row_quardoc['Дата отгрузки']), '>'):
-                    row_quardoc['Статус проверки'] = ap(row_quardoc['Статус проверки'], STATUS['Дата ДК и АоРПИ'])
-                    row_quardoc['Расхождения'].append({'Тип': 'Дата АоРПИ',
-                                                   'Рез': row_quardoc['Дата АоРПИ'],
-                                                   'Преф': 'Дата АоРПИ: \n'})
-            else:
-                row_quardoc['Статус проверки'] = ap(row_quardoc['Статус проверки'], STATUS['АоРПИ номер в ДК'])
-
         else:
             row_quardoc['Статус проверки'] = STATUS['Марка']
 
