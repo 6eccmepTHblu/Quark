@@ -40,8 +40,7 @@ def main():
         'АоРПИ=КМД': rec__KMD_AoRPI.reconciliation_data(
             all_data['КМД'],
             all_data['АОРПИ изделия'],
-            all_data['АООК ПКМ'],
-            all_data['АООК дата']
+            all_data['АООК ПКМ']
         ),
         'Заключения=ЖСР': rec__JSR_CSV.reconciliation_data(
             all_data['ЖСР'],
@@ -55,8 +54,7 @@ def main():
         'Качество=КМД': rec__KMD_quardoc.reconciliation_data(
             all_data['КМД'],
             all_data['ДК'],
-            all_data['АООК качество'],
-            all_data['АООК дата']
+            all_data['АООК качество']
         )
     }
 

@@ -1,5 +1,3 @@
-from def_folder import data_collection as coll
-from def_folder import data_normalization as norm
 from def_folder.data_normalization import append_value as ap
 
 STATUS = {'Полное совпадение': 'Полное совпадение',
@@ -9,7 +7,7 @@ STATUS = {'Полное совпадение': 'Полное совпадени�
           'Вес': 'Общий вес'}  # Итоговые статусы проверки
 
 
-def reconciliation_data(kmd, qualdoc, aook, date_aook):
+def reconciliation_data(kmd, qualdoc, aook):
     if not kmd:
         print('!!! Данны по КМД отсутствуют!')
         return None
@@ -34,7 +32,6 @@ def reconciliation_data(kmd, qualdoc, aook, date_aook):
 
     # Сопаставление данных КМД с качество с изделиями
     for row_kmd in kmd:
-        row_kmd['АООК Дата'] = date_aook  # Переносим даты
         row_kmd['Марка качества'] = []
         row_kmd['Наим качества'] = []
         for i, row_quardoc in enumerate(qualdoc):

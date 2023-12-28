@@ -1,6 +1,3 @@
-from def_folder import data_normalization as norm
-from def_folder import data_collection as coll
-from def_folder.normalization import NOT_SPECIFIED
 from def_folder.data_normalization import append_value as ap
 
 
@@ -10,7 +7,7 @@ STATUS = {'Полное совпадение': 'Полное совпадени�
           'Марка': 'Не найдена марка'}  # Итоговые статусы проверки
 
 
-def reconciliation_data(kmd, aorpi, aook, date_aook):
+def reconciliation_data(kmd, aorpi, aook):
     if not kmd:
         print('!!! Данны по КМД отсутствуют!')
         return None
@@ -47,7 +44,6 @@ def reconciliation_data(kmd, aorpi, aook, date_aook):
 
     # Сверяем данные КМД с АоРПИ
     for row_kmd in kmd:
-        row_kmd['АООК Дата'] = date_aook  # Переносим даты
         row_kmd['Расхождения'] = []
         row_kmd['Статус проверки'] = ''
         if row_kmd['Марка АоРПИ']:

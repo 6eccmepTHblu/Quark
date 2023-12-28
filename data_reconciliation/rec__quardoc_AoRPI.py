@@ -1,4 +1,3 @@
-from def_folder import data_collection as coll
 from def_folder.data_normalization import append_value as ap
 
 STATUS = {'Полное совпадение': 'Полное совпадение',
