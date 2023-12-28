@@ -42,7 +42,9 @@ def enter_data_on_the_sheet(table: list, headers: dict, sheet: Worksheet, com_ad
         if com_add and 'Расхождения' in row_data: # Добавляем комментарии на лист если они есть
             for com in row_data['Расхождения']:
                 comment = Comment(com['Преф'] + str(com['Рез']), 'Я', 100, 350)
-                sheet.cell(row=i + 1,column=get_number_key_in_dict(headers, com['Тип'])).comment = comment
+                coll_num = get_number_key_in_dict(headers, com['Тип'])
+                if coll_num:
+                    sheet.cell(row=i + 1,column=get_number_key_in_dict(headers, com['Тип'])).comment = comment
 
 
 def get_list_in_excel(file_name: str, sheet_name: str, create_workbook:bool = False) -> tuple:
@@ -89,6 +91,7 @@ def get_number_key_in_dict(dict, key):
     for i, item in enumerate(dict):
         if item == key:
             return i+1
+    return 0
 
 def find_sheet(workbook, mask_name):
     sheets = []

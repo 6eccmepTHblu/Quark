@@ -23,23 +23,6 @@ def get_data(path, mask, type_name):
     # Открываем книгу АООК
     wb = openpyxl.load_workbook(file)
 
-    # Находим дату АООК
-    sh = wb[excel.find_sheet(wb, '*АООК*')[0]]
-    data_aook = ''
-    for row in sh.iter_rows():
-        for cell in row:
-            if fnmatch.fnmatch(str(cell.value), DATE_CELL):
-                # Если нашли ячейку со значением "дата", то берем значение из строки выше
-                data_aook = sh.cell(row=cell.row - 1, column=cell.column).value
-                break
-        if data_aook:
-            break
-
-    # Нормируем дату АООК
-    data_aook = data_aook.replace('"', '').replace('г.', '').strip()
-    data_aook = norm.get_date(data_aook)
-    print("Дата АООК:", data_aook)
-
     # Собираем реестры АООК
     reestr_aook = []
     for sh in wb:
@@ -77,7 +60,35 @@ def get_data(path, mask, type_name):
             row[f'{type_name} Номер из АООК'] = norm.transliteration_ru_en(nambe).upper()
 
     print('Данные из АООК собранны - ' + str(len(reestr_aook)) + '.')
-    return reestr_aook, data_aook
+    return reestr_aook
+
+def get_date(path):
+    # Найти файл
+    file = fun.find_file(path, TEMPLATES)
+    if file == '':
+        return None
+
+    # Открываем книгу АООК
+    wb = openpyxl.load_workbook(file)
+
+    # Находим дату АООК
+    sh = wb[excel.find_sheet(wb, '*АООК*')[0]]
+    data_aook = ''
+    for row in sh.iter_rows():
+        for cell in row:
+            if fnmatch.fnmatch(str(cell.value), DATE_CELL):
+                # Если нашли ячейку со значением "дата", то берем значение из строки выше
+                data_aook = sh.cell(row=cell.row - 1, column=cell.column).value
+                break
+        if data_aook:
+            break
+
+    # Нормируем дату АООК
+    data_aook = data_aook.replace('"', '').replace('г.', '').strip()
+    data_aook = norm.get_date(data_aook)
+    print("Дата АООК:", data_aook)
+
+    return data_aook
 
 
 if __name__ == '__main__':
