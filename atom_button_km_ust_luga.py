@@ -5,8 +5,20 @@ import os
 from sys import argv, exit
 from def_folder import data_collection as fun
 from loading_data import excel_KMD, excel_AOOK, excel_JSR
-from data_reconciliation import rec__KMD_AoRPI, rec__JSR_CSV, rec__quardoc_AoRPI, rec__KMD_quardoc
-from data_output import out__KMD_AoRPI, out__JSR_CSV, out__quardoc_AoRPI, out__KMD_qualdoc
+from data_reconciliation import (
+    rec__KMD_AoRPI,
+    rec__JSR_CSV,
+    rec__quardoc_AoRPI,
+    rec__KMD_quardoc,
+    rec__DOC__AoRPI_AOOK
+)
+from data_output import (
+    out__KMD_AoRPI,
+    out__JSR_CSV,
+    out__quardoc_AoRPI,
+    out__KMD_qualdoc,
+    out__DOC__AoRPI_AOOK
+)
 from data_output.data_in_excel import main as xl
 
 try:
@@ -24,6 +36,7 @@ def main():
 
     ### Собираем данные
     all_data = {
+        'АОРПИ': fun.collects_data_by_type(path, ['АОРПИ Усть-Луга'], '-'),
         'АОРПИ изделия': fun.collects_data_by_type(path, ['АОРПИ Усть-Луга'], 'АОРПИ Усть-Луга изделия'),
         'АОРПИ докум': fun.collects_data_by_type(path, ['АОРПИ Усть-Луга'], 'АОРПИ Усть-Луга сопр.док.'),
         'АООК дата': excel_AOOK.get_date(path),
@@ -37,32 +50,38 @@ def main():
 
     ### Сверки
     all_result_check = {
-        'АоРПИ=КМД': rec__KMD_AoRPI.reconciliation_data(
-            all_data['КМД'],
-            all_data['АОРПИ изделия'],
-            all_data['АООК ПКМ']
+        'Докум->АоРПИ=АООК':rec__DOC__AoRPI_AOOK.reconciliation_data(
+            all_data['АОРПИ'],
+            all_data['АООК ПКМ'],
+            all_data['АООК дата']
         ),
-        'Заключения=ЖСР': rec__JSR_CSV.reconciliation_data(
-            all_data['ЖСР'],
-            all_data['Заключения']
-        ),
-        'Качество=АоРПИ': rec__quardoc_AoRPI.reconciliation_data(
-            all_data['ДК'],
-            all_data['АОРПИ изделия'],
-            all_data['АОРПИ докум']
-        ),
-        'Качество=КМД': rec__KMD_quardoc.reconciliation_data(
-            all_data['КМД'],
-            all_data['ДК'],
-            all_data['АООК качество']
-        )
+        # 'АоРПИ=КМД': rec__KMD_AoRPI.reconciliation_data(
+        #     all_data['КМД'],
+        #     all_data['АОРПИ изделия'],
+        #     all_data['АООК ПКМ']
+        # ),
+        # 'Заключения=ЖСР': rec__JSR_CSV.reconciliation_data(
+        #     all_data['ЖСР'],
+        #     all_data['Заключения']
+        # ),
+        # 'Качество=АоРПИ': rec__quardoc_AoRPI.reconciliation_data(
+        #     all_data['ДК'],
+        #     all_data['АОРПИ изделия'],
+        #     all_data['АОРПИ докум']
+        # ),
+        # 'Качество=КМД': rec__KMD_quardoc.reconciliation_data(
+        #     all_data['КМД'],
+        #     all_data['ДК'],
+        #     all_data['АООК качество']
+        # )
     }
 
     ### Вывод в Excel
-    out__KMD_AoRPI.data_output(all_result_check["АоРПИ=КМД"], FAIL_NAME)
-    out__JSR_CSV.data_output(all_result_check["Заключения=ЖСР"], FAIL_NAME)
-    out__quardoc_AoRPI.data_output(all_result_check["Качество=АоРПИ"], FAIL_NAME)
-    out__KMD_qualdoc.data_output(all_result_check["Качество=КМД"], FAIL_NAME)
+    out__DOC__AoRPI_AOOK.data_output(all_result_check["Докум->АоРПИ=АООК"], FAIL_NAME)
+    # out__KMD_AoRPI.data_output(all_result_check["АоРПИ=КМД"], FAIL_NAME)
+    # out__JSR_CSV.data_output(all_result_check["Заключения=ЖСР"], FAIL_NAME)
+    # out__quardoc_AoRPI.data_output(all_result_check["Качество=АоРПИ"], FAIL_NAME)
+    # out__KMD_qualdoc.data_output(all_result_check["Качество=КМД"], FAIL_NAME)
 
 
 if __name__ == "__main__":
