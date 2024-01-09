@@ -68,7 +68,7 @@ def reconciles_documents_report():
         else:
             row['Дата прибытия'] = max(date_list).strftime("%d.%m.%Y")
         mouth = row['Дата прибытия'].split('.')
-        row.setdefault('Номер удостоверения', str(mouth[1] if len(mouth) > 1 else 0) + '/' + number)
+        row.setdefault('Номер удостоверения', str(mouth[1] if len(mouth) > 1 else 0) + '/' + str(number+i))
 
     # Вывод данныех в Excel
     out.data_output(data_report_result, FAIL_NAME)
