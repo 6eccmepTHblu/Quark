@@ -1,8 +1,9 @@
-from def_folder import data_normalization as norm
-from def_folder import data_collection as coll
-from def_folder.normalization import NOT_SPECIFIED
+import pprint
+import numpy as np
 
-STATUS = {'АОРПИ !=': 'Не указан в АОРПИ',
+import pandas as pd
+
+STATUS = {'АОРПИ !=': 'Не приложен АОРПИ',
           'АООК !=': 'Не указан в АООК',
           'АООК != дата': 'Не равна дате АоРПИ в АООК',
           'АООК < АоРПИ': 'Наньше чем дата АоРПИ'}  # Итоговые статусы проверки
@@ -17,36 +18,40 @@ def reconciliation_data(aorpi, aook, date_aook):
         print('!!! Данны по АООК отсутствуют!')
         return None
 
-    data_itog = [{'Номер АОРПИ': row['Номер'], 'Дата АОРПИ': row['Дата']} for row in aorpi]
+    # Объединение по ключу
+    data_itog = pd.merge(
+        pd.DataFrame(aorpi),
+        pd.DataFrame(aook),
+        left_on='Номер',
+        right_on='АоРПИ Номер из АООК',
+        how='outer',
+        suffixes=('_1', '_2'),
+        validate="many_to_many"
+    )
 
-    data_itog_dict = {row['Номер АОРПИ']: row for row in data_itog}
-    for row in aook:
-        if row.get('АоРПИ Номер из АООК', '+') in data_itog_dict:
-            row_itog = data_itog_dict[row['АоРПИ Номер из АООК']]
-            row_itog['Номер АООК'] = row['АоРПИ Номер из АООК']
-            row_itog['Дата АООК'] = row['АоРПИ Дата из АООК']
-        else:
-            temp = {}
-            temp['Номер АООК'] = row['АоРПИ Номер из АООК']
-            temp['Дата АООК'] = row['АоРПИ Дата из АООК']
-            data_itog.append(temp)
+    # Проверка отсутствия 'Номер' в data_itog
+    condition_no_aorpi = data_itog['Номер'].isnull()
+    data_itog.loc[condition_no_aorpi, 'Статус проверки'] = STATUS['АООК !=']
 
-    for row in data_itog:
-        row['Статус проверки'] = ''
-        row['Расхождения'] = []
-        if 'Номер АООК' in row and 'Номер АОРПИ' in row:
-            if row['Дата АОРПИ'] == row['Дата АООК']:
-                continue
-            else:
-                row['Статус проверки'] = STATUS['АООК != дата']
-                row['Расхождения'].append({'Тип': 'Дата АОРПИ',
-                                           'Рез': row['Дата АООК'],
-                                           'Преф': 'Дата из АООК: \n'})
-        elif 'Номер АООК' in row:
-            row['Статус проверки'] = STATUS['АОРПИ !=']
-            row['Дата АОРПИ'] = row['Дата АООК']
-        elif 'Номер АОРПИ' in row:
-            row['Статус проверки'] = STATUS['АООК !=']
+    # Проверка отсутствия 'АоРПИ Номер из АООК' в data_itog
+    condition_no_aook = data_itog['АоРПИ Номер из АООК'].isnull()
+    data_itog.loc[condition_no_aook, 'Статус проверки'] = STATUS['АОРПИ !=']
 
-    print('Сверка CSV(Заключений) с ЖСР произведена.')
+    # Проверка дат АоРПИ и АООК
+    data_itog['Дата'] = pd.to_datetime(data_itog['Дата'], format='%d.%m.%Y', errors='coerce')
+    data_itog['АоРПИ Дата из АООК'] = pd.to_datetime(data_itog['АоРПИ Дата из АООК'], format='%d.%m.%Y',
+                                                     errors='coerce')
+    data_itog.replace('nan', '', inplace=True)
+    condition = data_itog['Статус проверки'].eq("")
+    data_itog.loc[condition, 'Статус проверки'] = np.where(
+        data_itog.loc[condition, 'Дата'] == data_itog.loc[condition, 'АоРПИ Дата из АООК'],
+        '',
+        STATUS['АООК != дата']
+    )
+    # Конвертируем данные в лист словарей
+    data_itog['Дата'] = data_itog['Дата'].dt.strftime('%d.%m.%Y')
+    data_itog['АоРПИ Дата из АООК'] = data_itog['АоРПИ Дата из АООК'].dt.strftime('%d.%m.%Y')
+    data_itog = data_itog.map(lambda x: '' if pd.isna(x) else x)
+    data_itog = data_itog.to_dict(orient='records')
+
     return data_itog
