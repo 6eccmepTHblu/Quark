@@ -56,6 +56,9 @@ def data_output(table, file_name):
         ],
         f'AND(ROW()>1, {col(HEADERS, "Статус проверки")}<>"")': [
             {'Цвет': COLORS['Красный'], 'Диапазон': col(HEADERS, ["Статус проверки", "Статус проверки"])}
+        ],
+        f'AND(ROW()>1, SEARCH("{STATUS["АООК < АоРПИ"]}",{col(HEADERS, "Статус проверки")}))': [
+            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Дата", "Дата"])}
         ]
     }
     uf_color(uf, sh)

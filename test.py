@@ -1,6 +1,8 @@
+import pprint
+
 import pandas as pd
 
-col_1 = {'name1': 'col_name', 'date1': 'col_date'}
+col_1 = {'name1': 'col_name', 'date1': 'col_date_1', 'date2': 'col_date_2'}
 col_2 = {'name2': 'col_name', 'date2': 'col_date'}
 key_1 = 'name1'
 key_2 = 'name2'
@@ -26,5 +28,13 @@ df_2 = pd.DataFrame(table_2)
 # Объединение по ключу "col_name"
 merged_df = pd.merge(df_1, df_2, left_on=col_1[key_1], right_on=col_2[key_2], how='outer', suffixes=('_1', '_2'))
 
+# Добавление словаря в столбец "Расхождения"
+merged_df['Расхождения'] = merged_df.apply(lambda row: [{'Тип': 'Дата работ', 'Рез': row[col_1['date1']], 'Преф': 'Дата из НК: \n'}]
+                                            if row[col_1['date1']] != row[col_2['date2']]
+                                            else [], axis=1)
+
 # Вывод результата
-print(merged_df)
+
+merged_df.to_csv('название_файла 2.csv', index=False)
+data_itog = merged_df.to_dict(orient='records')
+pprint.pprint(data_itog)

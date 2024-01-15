@@ -1,6 +1,3 @@
-import pprint
-import numpy as np
-
 import pandas as pd
 
 STATUS = {'АОРПИ !=': 'Не приложен АОРПИ',
@@ -29,29 +26,33 @@ def reconciliation_data(aorpi, aook, date_aook):
         validate="many_to_many"
     )
 
-    # Проверка отсутствия 'Номер' в data_itog
-    condition_no_aorpi = data_itog['Номер'].isnull()
-    data_itog.loc[condition_no_aorpi, 'Статус проверки'] = STATUS['АООК !=']
+    # Преобразуем даты в даты
+    data_itog['Дата АООК'] = pd.to_datetime(date_aook, dayfirst=True)
+    data_itog['_Дата'] = pd.to_datetime(data_itog['Дата'], format='%d.%m.%Y', errors='coerce')
+    data_itog['_Дата АООК'] = pd.to_datetime(data_itog['Дата АООК'], format='%d.%m.%Y', errors='coerce')
+    data_itog['_АоРПИ Дата из АООК'] = pd.to_datetime(data_itog['АоРПИ Дата из АООК'], format='%d.%m.%Y',
+                                                      errors='coerce')
 
-    # Проверка отсутствия 'АоРПИ Номер из АООК' в data_itog
-    condition_no_aook = data_itog['АоРПИ Номер из АООК'].isnull()
-    data_itog.loc[condition_no_aook, 'Статус проверки'] = STATUS['АОРПИ !=']
-
-    # Проверка дат АоРПИ и АООК
-    data_itog['Дата'] = pd.to_datetime(data_itog['Дата'], format='%d.%m.%Y', errors='coerce')
-    data_itog['АоРПИ Дата из АООК'] = pd.to_datetime(data_itog['АоРПИ Дата из АООК'], format='%d.%m.%Y',
-                                                     errors='coerce')
-    data_itog.replace('nan', '', inplace=True)
-    condition = data_itog['Статус проверки'].eq("")
-    data_itog.loc[condition, 'Статус проверки'] = np.where(
-        data_itog.loc[condition, 'Дата'] == data_itog.loc[condition, 'АоРПИ Дата из АООК'],
-        '',
-        STATUS['АООК != дата']
-    )
     # Конвертируем данные в лист словарей
-    data_itog['Дата'] = data_itog['Дата'].dt.strftime('%d.%m.%Y')
-    data_itog['АоРПИ Дата из АООК'] = data_itog['АоРПИ Дата из АООК'].dt.strftime('%d.%m.%Y')
+    data_itog['Расхождения'] = data_itog.apply(lambda row: [], axis=1)
     data_itog = data_itog.map(lambda x: '' if pd.isna(x) else x)
     data_itog = data_itog.to_dict(orient='records')
+
+    # Сверяем даты между собой
+    for row in data_itog:
+        if row['Номер'] == '':
+            row['Статус проверки'] = STATUS['АООК !=']
+        elif row['АоРПИ Номер из АООК'] == '':
+            row['Статус проверки'] = STATUS['АОРПИ !=']
+        elif row['_Дата'] != row['_АоРПИ Дата из АООК']:
+            row['Статус проверки'] = STATUS['АООК != дата']
+            row['Расхождения'].append({'Тип': 'Дата',
+                                       'Рез': row['АоРПИ Дата из АООК'],
+                                       'Преф': 'Дата из АООК: \n'})
+        elif row['_Дата'] > row['_Дата АООК']:
+            row['Статус проверки'] = STATUS['АООК < АоРПИ']
+            row['Расхождения'].append({'Тип': 'Дата',
+                                       'Рез': f"{row['Дата']} > {row['Дата АООК']}",
+                                       'Преф': ''})
 
     return data_itog
