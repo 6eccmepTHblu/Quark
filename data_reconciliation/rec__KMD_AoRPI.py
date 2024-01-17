@@ -1,4 +1,5 @@
 from def_folder.data_normalization import append_value as ap
+import copy
 
 
 STATUS = {'Полное совпадение': 'Полное совпадение',
@@ -11,6 +12,7 @@ def reconciliation_data(kmd, aorpi, aook):
     if not kmd:
         print('!!! Данны по КМД отсутствуют!')
         return None
+    result = copy.deepcopy(kmd)
 
     if not aorpi:
         print('!!! Данны по АоРПИ отсутствуют!')
@@ -31,7 +33,7 @@ def reconciliation_data(kmd, aorpi, aook):
                     break
 
     # Сопаставление данных КМД с АоРПИ
-    for row_kmd in kmd:
+    for row_kmd in result:
         row_kmd['Марка АоРПИ'] = []
         row_kmd['Наим АоРПИ'] = []
         for i, row_aorpi in enumerate(aorpi):
@@ -43,11 +45,12 @@ def reconciliation_data(kmd, aorpi, aook):
                     row_kmd['Наим АоРПИ'].append(i)
 
     # Сверяем данные КМД с АоРПИ
-    for row_kmd in kmd:
+    for row_kmd in result:
         row_kmd['Расхождения'] = []
         row_kmd['Статус проверки'] = ''
         if row_kmd['Марка АоРПИ']:
             row_aorpi = aorpi[row_kmd['Марка АоРПИ'][0]]  # Строка в таблице АоРПИ
+            row_kmd['Номер АоРПИ'] = row_aorpi['Номер']
 
             # Наименование
             if row_kmd['Наименование'] != row_aorpi['НаимПродукции']:
@@ -68,4 +71,4 @@ def reconciliation_data(kmd, aorpi, aook):
             row_kmd['Статус проверки'] = STATUS['Полное совпадение']
 
     print('Сверка АоРПИ с КМД произведена.')
-    return kmd
+    return result

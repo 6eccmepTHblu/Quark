@@ -1,3 +1,5 @@
+import copy
+
 from def_folder.data_normalization import append_value as ap
 
 STATUS = {'Полное совпадение': 'Полное совпадение',
@@ -11,6 +13,7 @@ def reconciliation_data(kmd, qualdoc, aook):
     if not kmd:
         print('!!! Данны по КМД отсутствуют!')
         return None
+    result = copy.deepcopy(kmd)
 
     if not qualdoc:
         print('!!! Данны по Качеству отсутствуют!')
@@ -31,7 +34,7 @@ def reconciliation_data(kmd, qualdoc, aook):
                     break
 
     # Сопаставление данных КМД с качество с изделиями
-    for row_kmd in kmd:
+    for row_kmd in result:
         row_kmd['Марка качества'] = []
         row_kmd['Наим качества'] = []
         for i, row_quardoc in enumerate(qualdoc):
@@ -43,7 +46,7 @@ def reconciliation_data(kmd, qualdoc, aook):
                     row_kmd['Наим качества'].append(i)
 
     # Сверяем данные КМД с Качества
-    for row_kmd in kmd:
+    for row_kmd in result:
         row_kmd['Расхождения'] = []
         row_kmd['Статус проверки'] = ''
         if row_kmd['Марка качества']:
@@ -75,5 +78,5 @@ def reconciliation_data(kmd, qualdoc, aook):
         if row_kmd['Статус проверки'] == '':
             row_kmd['Статус проверки'] = STATUS['Полное совпадение']
 
-    print('Сверка АоРПИ с КМД произведена.')
-    return kmd
+    print('Сверка Качество с КМД произведена.')
+    return result

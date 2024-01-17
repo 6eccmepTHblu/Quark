@@ -132,3 +132,17 @@ def remove_side_values(text: str, regx: str = r'[а-яёА-ЯЁa-zA-Z0-9]') -> s
     while not re.search(regx + r'$', text) and text != '':
         text = text[:-1]
     return text
+
+def fill_missing_keys(list_of_dicts):
+    # Находим все уникальные ключи
+    all_keys = set()
+    for d in list_of_dicts:
+        all_keys.update(d.keys())
+
+    # Проходим заново по списку словарей и добавляем недостающие ключи с пустыми значениями
+    for d in list_of_dicts:
+        missing_keys = all_keys - set(d.keys())
+        for key in missing_keys:
+            d[key] = ''
+
+    return list_of_dicts

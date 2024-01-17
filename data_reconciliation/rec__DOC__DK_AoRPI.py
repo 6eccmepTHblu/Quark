@@ -25,6 +25,10 @@ def reconciliation_data(dk, aorpi):
         suffixes=('_1', '_2'),
         validate="many_to_many"
     )
+    data_itog = data_itog.drop_duplicates(subset=['Номер документа',
+                                                  'Номер док.',
+                                                  'Дата отгрузки',
+                                                  'Дата док.'])
 
     # Преобразуем даты в даты
     data_itog['_Дата док.'] = pd.to_datetime(data_itog['Дата док.'], format='%d.%m.%Y', errors='coerce')

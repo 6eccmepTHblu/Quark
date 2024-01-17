@@ -25,6 +25,10 @@ def reconciliation_data(dk, aook, date_aook):
         suffixes=('_1', '_2'),
         validate="many_to_many"
     )
+    data_itog = data_itog.drop_duplicates(subset=['Номер документа',
+                                                  'Качества Номер из АООК',
+                                                  'Дата отгрузки',
+                                                  'Качества Дата из АООК'])
 
     # Преобразуем даты в даты
     data_itog['Дата АООК'] = pd.to_datetime(date_aook, dayfirst=True)

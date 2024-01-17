@@ -6,7 +6,7 @@ from openpyxl.comments import Comment
 from openpyxl.worksheet.worksheet import Worksheet
 
 
-def enter_data_on_the_sheet(table: list, headers: dict, sheet: Worksheet, com_add: bool = True) -> None:
+def enter_data_on_the_sheet(table: list, headers: dict, sheet: Worksheet, com_add: bool = True, c1: int = 0) -> None:
     """
         **Функция `enter_data_on_the_sheet`**
 
@@ -35,19 +35,22 @@ def enter_data_on_the_sheet(table: list, headers: dict, sheet: Worksheet, com_ad
     if not isinstance(table, list):
         return None
 
+    if c1 != 0:
+        c1 -= 1
+
     table.insert(0, headers)  # Вставляем заголовки в начало таблицы
-    for i, row_data in enumerate(table):
-        result = [str(row_data.get(key,'')) for key in headers]  # Получаем значения по ключам
-        sheet.append(result)  # Добавляем данные на лист
-        if com_add and 'Расхождения' in row_data: # Добавляем комментарии на лист если они есть
+    for i, row_data in enumerate(table, start=1):
+        for j, key in enumerate(headers, start=1):
+            sheet.cell(row=i, column=c1 + j, value=str(row_data.get(key, '')))
+        if com_add and 'Расхождения' in row_data:  # Добавляем комментарии на лист если они есть
             for com in row_data['Расхождения']:
                 comment = Comment(com['Преф'] + str(com['Рез']), 'Я', 100, 350)
                 coll_num = get_number_key_in_dict(headers, com['Тип'])
                 if coll_num:
-                    sheet.cell(row=i + 1,column=get_number_key_in_dict(headers, com['Тип'])).comment = comment
+                    sheet.cell(row=i, column=c1 + get_number_key_in_dict(headers, com['Тип'])).comment = comment
 
 
-def get_list_in_excel(file_name: str, sheet_name: str, create_workbook:bool = False) -> tuple:
+def get_list_in_excel(file_name: str, sheet_name: str, create_workbook: bool = False, one_sheet: bool = False) -> tuple:
     """
         **Функция `get_list_in_excel`**
 
@@ -74,24 +77,34 @@ def get_list_in_excel(file_name: str, sheet_name: str, create_workbook:bool = Fa
     else:
         wb = openpyxl.load_workbook(file_name)
 
+    if one_sheet:
+        for sh in wb:
+            if sh.title == sheet_name:
+                return wb, sh
+        sh = wb.create_sheet(sheet_name)
+        return wb, sh
+
     if len(wb.worksheets) == 1:
         sh = wb.active
         if sh.title == 'Sheet':
             sh.title = sheet_name
         else:
             sh = wb.create_sheet(sheet_name)
-    else:
-        if sheet_name in wb.sheetnames:
-            wb.remove(wb[sheet_name])
-        sh = wb.create_sheet(sheet_name)
+        return wb, sh
+
+    if sheet_name in wb.sheetnames:
+        wb.remove(wb[sheet_name])
+    sh = wb.create_sheet(sheet_name)
 
     return wb, sh
+
 
 def get_number_key_in_dict(dict, key):
     for i, item in enumerate(dict):
         if item == key:
-            return i+1
+            return i + 1
     return 0
+
 
 def find_sheet(workbook, mask_name):
     sheets = []
@@ -160,7 +173,7 @@ def get_data_by_headers(table, headers):
             for row in table[row_result:]:
                 row_data = {}
                 for key, item in normal_headers.items():
-                    if isinstance(item, int) and  len(row) > item:
+                    if isinstance(item, int) and len(row) > item:
                         row_data[key] = row[item]
                 if row_data:
                     date.append(row_data)

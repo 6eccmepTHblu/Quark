@@ -8,10 +8,11 @@ from def_folder.excel_style import (get_column_by_key as col,
 from data_reconciliation.rec__KMD_AoRPI import STATUS
 from consts.colors import COLORS
 
-SHEET_NAME = "АоРПИ_КМД_АООК"
-HEADERS = {'Марка': 'Марка',
+SHEET_NAME = "АоРПИ_КМД"
+HEADERS = {'Марка': 'Марка из КМД',
            'Наименование': 'Наименование из КМД',
-           'Количество': 'Кол-во КМД',
+           'Количество': 'Кол-во из КМД',
+           'Номер АоРПИ':'Номер АоРПИ',
            'Статус проверки': 'Результат'}
 
 def data_output(table, file_name):
@@ -55,7 +56,7 @@ def data_output(table, file_name):
             {'Цвет': COLORS['Жёлтый'], 'Диапазон': col(HEADERS, ["Количество", "Количество"])}
         ],
         f'AND(ROW()>1, SEARCH("{STATUS["Марка"]}",{col(HEADERS, "Статус проверки")}))': [
-            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Марка", "Количество"])}
+            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Марка", "Номер АоРПИ"])}
         ]
     }
     uf_color(uf, sh)

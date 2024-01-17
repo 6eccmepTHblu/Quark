@@ -8,7 +8,7 @@ from def_folder.excel_style import (get_column_by_key as col,
 from data_reconciliation.rec__DOC__AoRPI_AOOK import STATUS
 from consts.colors import COLORS
 
-SHEET_NAME = "Сверка документов"
+SHEET_NAME = "Комплектность"
 HEADERS = {'Номер': 'Номер АОРПИ',
            'АоРПИ Номер из АООК': 'Номера АоРПИ в АООК',
            'Дата': 'Дата\nАОРПИ/АООК',
@@ -19,7 +19,7 @@ def data_output(table, file_name):
         print('!!! Сврека АООК с АоРПИ отсутствует, лист не будет создан')
         return None
 
-    wb, sh = get_list_in_excel(file_name, SHEET_NAME)
+    wb, sh = get_list_in_excel(file_name, SHEET_NAME, one_sheet=True)
 
     enter_data_on_the_sheet(table, HEADERS, sh)
 

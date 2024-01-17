@@ -56,48 +56,48 @@ def main():
     ### Сверки
     all_result_check = {
         'Докум->КМД=АоРПИ':rec__DOC__DK_AoRPI.reconciliation_data(
-            all_data['ДК реестр'],
-            all_data['АОРПИ докум']
+            all_data['ДК реестр'][:],
+            all_data['АОРПИ докум'][:]
         ),
         'Докум->КМД=АООК':rec__DOC__DK_AOOK.reconciliation_data(
-            all_data['ДК реестр'],
-            all_data['АООК качество'],
+            all_data['ДК реестр'][:],
+            all_data['АООК качество'][:],
             all_data['АООК дата']
         ),
         'Докум->АоРПИ=АООК':rec__DOC__AoRPI_AOOK.reconciliation_data(
-            all_data['АОРПИ'],
-            all_data['АООК ПКМ'],
+            all_data['АОРПИ'][:],
+            all_data['АООК ПКМ'][:],
             all_data['АООК дата']
         ),
         'АоРПИ=КМД': rec__KMD_AoRPI.reconciliation_data(
-            all_data['КМД'],
-            all_data['АОРПИ изделия'],
-            all_data['АООК ПКМ']
+            all_data['КМД'][:],
+            all_data['АОРПИ изделия'][:],
+            all_data['АООК ПКМ'][:]
         ),
         'Заключения=ЖСР': rec__JSR_CSV.reconciliation_data(
-            all_data['ЖСР'],
-            all_data['Заключения']
+            all_data['ЖСР'][:],
+            all_data['Заключения'][:]
         ),
         'Качество=АоРПИ': rec__quardoc_AoRPI.reconciliation_data(
-            all_data['ДК'],
-            all_data['АОРПИ изделия'],
-            all_data['АОРПИ докум']
+            all_data['ДК'[:]],
+            all_data['АОРПИ изделия'][:],
+            all_data['АОРПИ докум'][:]
         ),
         'Качество=КМД': rec__KMD_quardoc.reconciliation_data(
-            all_data['КМД'],
-            all_data['ДК'],
-            all_data['АООК качество']
+            all_data['КМД'][:],
+            all_data['ДК'][:],
+            all_data['АООК качество'][:]
         )
     }
 
     ### Вывод в Excel
-    out__DOC__DK_AoRPI.data_output(all_result_check["Докум->КМД=АоРПИ"], FAIL_NAME)
-    out__DOC__DK_AOOK.data_output(all_result_check["Докум->КМД=АООК"], FAIL_NAME)
-    out__DOC__AoRPI_AOOK.data_output(all_result_check["Докум->АоРПИ=АООК"], FAIL_NAME)
     out__KMD_AoRPI.data_output(all_result_check["АоРПИ=КМД"], FAIL_NAME)
     out__JSR_CSV.data_output(all_result_check["Заключения=ЖСР"], FAIL_NAME)
     out__quardoc_AoRPI.data_output(all_result_check["Качество=АоРПИ"], FAIL_NAME)
     out__KMD_qualdoc.data_output(all_result_check["Качество=КМД"], FAIL_NAME)
+    out__DOC__AoRPI_AOOK.data_output(all_result_check["Докум->АоРПИ=АООК"], FAIL_NAME)
+    out__DOC__DK_AOOK.data_output(all_result_check["Докум->КМД=АООК"], FAIL_NAME)
+    out__DOC__DK_AoRPI.data_output(all_result_check["Докум->КМД=АоРПИ"], FAIL_NAME)
 
 
 if __name__ == "__main__":

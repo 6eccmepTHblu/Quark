@@ -51,7 +51,7 @@ def conditional_formatting_font(sheet: Worksheet, formul: str, range: str) -> No
         rule = Rule(type="expression", formula=[formul], dxf=diff_style)
         sheet.conditional_formatting.add(range, rule)
 
-def get_column_by_key(headers: list, key: str|list) -> None:
+def get_column_by_key(headers: list, key: str|list, col:int = 0) -> None:
     """
     **Функция `get_column_by_key`**
     Эта функция возвращает диапазон столбцов в формате Excel (например, "A1:B1") для заданных ключей из заголовков.
@@ -67,6 +67,10 @@ def get_column_by_key(headers: list, key: str|list) -> None:
     columns_range = get_column_by_key(["Name", "Age", "Gender"], "Age")
     """
     if headers and key:
+
+        if col != 0:
+            col -= 1
+
         if not isinstance(key, list):
             key = [key]
 
@@ -78,9 +82,9 @@ def get_column_by_key(headers: list, key: str|list) -> None:
                     break
         if range:
             if len(range) == 1:
-                return '$' + get_column_letter(range[0]) + '1'
+                return '$' + get_column_letter(range[0]+col) + '1'
             else:
-                return get_column_letter(range[0]) + '1:' + get_column_letter(range[1]) + '1048576'
+                return get_column_letter(range[0]+col) + '1:' + get_column_letter(range[1]+col) + '1048576'
     return ''
 
 def conditional_formatting(uf:dict, sh: Worksheet) -> None:

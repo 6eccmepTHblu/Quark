@@ -8,7 +8,7 @@ from def_folder.excel_style import (get_column_by_key as col,
 from data_reconciliation.rec__KMD_quardoc import STATUS
 from consts.colors import COLORS
 
-SHEET_NAME = "КМД_ДК_АООК"
+SHEET_NAME = "КМД_ДК"
 HEADERS = {'Марка': 'Марка из КМД',
            'Наименование': 'Наименование из КМД',
            'Количество': 'Кол-во из КМД',
