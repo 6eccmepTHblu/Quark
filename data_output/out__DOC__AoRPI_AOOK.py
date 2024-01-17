@@ -11,7 +11,7 @@ from consts.colors import COLORS
 SHEET_NAME = "Комплектность"
 HEADERS = {'Номер': 'Номер АОРПИ',
            'АоРПИ Номер из АООК': 'Номера АоРПИ в АООК',
-           'Дата': 'Дата\nАОРПИ/АООК',
+           'Дата': 'Дата\nАОРПИ',
            'Статус проверки': 'Результат'}
 
 def data_output(table, file_name):
@@ -35,7 +35,7 @@ def data_output(table, file_name):
     table_style.apply_style(r1=2, r2=len(table), c2=len(HEADERS))
 
     # Результат
-    result_style = styles.RangeStyle(sh, 'Result_' + prefix_style, cell_color=COLORS['Зелёный'], bold=True)
+    result_style = styles.RangeStyle(sh, 'Result_' + prefix_style, cell_color=COLORS['Красный'], bold=True)
     result_style.apply_style(r1=2, c1=get_key(HEADERS, 'Статус проверки'), r2=len(table),
                              c2=get_key(HEADERS, 'Статус проверки'))
 
@@ -54,8 +54,8 @@ def data_output(table, file_name):
         f'AND(ROW()>1, SEARCH("{STATUS["АООК != дата"]}",{col(HEADERS, "Статус проверки")}))': [
             {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Дата", "Дата"])}
         ],
-        f'AND(ROW()>1, {col(HEADERS, "Статус проверки")}<>"")': [
-            {'Цвет': COLORS['Красный'], 'Диапазон': col(HEADERS, ["Статус проверки", "Статус проверки"])}
+        f'AND(ROW()>1, {col(HEADERS, "Статус проверки")}="{STATUS["Совпало"]}")': [
+            {'Цвет': COLORS['Зелёный'], 'Диапазон': col(HEADERS, ["Статус проверки", "Статус проверки"])}
         ],
         f'AND(ROW()>1, SEARCH("{STATUS["АООК < АоРПИ"]}",{col(HEADERS, "Статус проверки")}))': [
             {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Дата", "Дата"])}

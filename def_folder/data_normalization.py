@@ -1,4 +1,5 @@
 import fnmatch
+import os
 import re
 
 
@@ -146,3 +147,12 @@ def fill_missing_keys(list_of_dicts):
             d[key] = ''
 
     return list_of_dicts
+
+def csv_to_pdf_path(csv_path, name):
+    # Получение имени папки из пути к CSV-файлу
+    folder_name = os.path.splitext(os.path.basename(csv_path))[0]
+
+    # Формирование пути к PDF-файлу
+    pdf_path = os.path.join(os.path.dirname(csv_path), folder_name, name)
+
+    return pdf_path

@@ -11,13 +11,13 @@ from consts.colors import COLORS
 SHEET_NAME = "Комплектность"
 HEADERS = {'Номер документа': 'Номер ДК',
            'Качества Номер из АООК': 'Номера ДК в АООК',
-           'Дата отгрузки': 'Дата\nАОРПИ/АООК',
+           'Дата отгрузки': 'Дата\nДК',
            'Статус проверки': 'Результат'}
 
 
 def data_output(table, file_name):
     if not table:
-        print('!!! Сврека АООК с АоРПИ отсутствует, лист не будет создан')
+        print('!!! Сврека АООК с ДК отсутствует, лист не будет создан')
         return None
 
     wb, sh = get_list_in_excel(file_name, SHEET_NAME, one_sheet=True)
@@ -37,7 +37,7 @@ def data_output(table, file_name):
     table_style.apply_style(r1=2, r2=len(table), c1=ind, c2=ind + len(HEADERS)-1)
 
     # Результат
-    result_style = styles.RangeStyle(sh, 'Result_' + prefix_style, cell_color=COLORS['Зелёный'], bold=True)
+    result_style = styles.RangeStyle(sh, 'Result_' + prefix_style, cell_color=COLORS['Красный'], bold=True)
     result_style.apply_style(r1=2, c1=ind + get_key(HEADERS, 'Статус проверки')-1, r2=len(table),
                              c2=ind + get_key(HEADERS, 'Статус проверки')-1)
 
@@ -56,8 +56,8 @@ def data_output(table, file_name):
         f'AND(ROW()>1, SEARCH("{STATUS["АООК != дата"]}",{col(HEADERS, "Статус проверки", ind)}))': [
             {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Дата отгрузки", "Дата отгрузки"], ind)}
         ],
-        f'AND(ROW()>1, {col(HEADERS, "Статус проверки", ind)}<>"")': [
-            {'Цвет': COLORS['Красный'], 'Диапазон': col(HEADERS, ["Статус проверки", "Статус проверки"], ind)}
+        f'AND(ROW()>1, {col(HEADERS, "Статус проверки", ind)}="{STATUS["Совпало"]}")': [
+            {'Цвет': COLORS['Зелёный'], 'Диапазон': col(HEADERS, ["Статус проверки", "Статус проверки"], ind)}
         ],
         f'AND(ROW()>1, SEARCH("{STATUS["АООК < АоРПИ"]}",{col(HEADERS, "Статус проверки", ind)}))': [
             {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Дата отгрузки", "Дата отгрузки"], ind)}

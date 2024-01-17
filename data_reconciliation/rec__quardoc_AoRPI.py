@@ -1,6 +1,7 @@
 import pandas as pd
+import os
 from def_folder.data_normalization import (append_value as ap,
-                                           fill_missing_keys as fill)
+                                           csv_to_pdf_path)
 
 STATUS = {'Полное совпадение': 'Полное совпадение',
           'Количество': 'Количество',
@@ -32,16 +33,6 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
     }).reset_index()
     quardoc = quardoc.to_dict(orient='records')
 
-    # Сопаставление данных качество с документами
-    for row_quardoc in quardoc:
-        row_quardoc['Сверка кач. докум.'] = []
-        for i, row_docum in enumerate(aorpi_docum):
-            if row_quardoc.get('Номер документа', '+') == row_docum.get('Номер док.', '-'):
-                row_quardoc['Сверка кач. докум.'].append(i)
-                row_quardoc['Номер АоРПИ'] = row_docum['Номер']
-                row_quardoc['Дата АоРПИ'] = row_docum['Дата']
-                row_quardoc['Дата АоРПИ Отгрузки'] = row_docum['Дата док.']
-
     # Сопаставление данных качество с изделиями
     for row_quardoc in quardoc:
         row_quardoc['Марка АоРПИ'] = []
@@ -64,7 +55,8 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
             row_izdel = aorpi_izdel[row_quardoc['Марка АоРПИ'][0]]  # Строка в таблице АоРПИ
             row_quardoc['Номер АоРПИ'] = row_izdel['Номер']
             row_quardoc['Дата АоРПИ'] = row_izdel['Дата']
-            row_quardoc['Номер АоРПИ'] = row_izdel['Номер']
+            row_quardoc[
+                'Номер АоРПИ'] = f'=HYPERLINK("{csv_to_pdf_path(row_izdel["ПутьФайла|"], row_izdel["Файл"])}", "{row_quardoc["Номер АоРПИ"]}")'
 
             # Наименование
             if row_quardoc['Наименование'] != row_izdel['НаимПродукции']:
@@ -74,7 +66,7 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
                                                    'Преф': 'Наименование из АоРПИ: \n'})
 
             # Количество
-            if row_quardoc['Количество'] != row_izdel['Количество']:
+            if str(row_quardoc['Количество']) != str(row_izdel['Количество']):
                 row_quardoc['Статус проверки'] = ap(row_quardoc['Статус проверки'], STATUS['Количество'])
                 row_quardoc['Расхождения'].append({'Тип': 'Количество',
                                                    'Рез': row_izdel['Количество'],
