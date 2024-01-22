@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from def_folder.data_normalization import (append_value as ap,
-                                           csv_to_pdf_path)
+                                           create_hyperlink)
 
 STATUS = {'Полное совпадение': 'Полное совпадение',
           'Количество': 'Количество',
@@ -51,12 +51,11 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
         row_quardoc.setdefault('Дата отгрузки', '01.01.1990')
         row_quardoc['Расхождения'] = []
         row_quardoc['Статус проверки'] = ''
+        row_quardoc['Номер документа'] = create_hyperlink(row_quardoc["ПутьФайла|"], row_quardoc['Файл'], row_quardoc['Номер документа'])
         if row_quardoc['Марка АоРПИ']:
             row_izdel = aorpi_izdel[row_quardoc['Марка АоРПИ'][0]]  # Строка в таблице АоРПИ
-            row_quardoc['Номер АоРПИ'] = row_izdel['Номер']
             row_quardoc['Дата АоРПИ'] = row_izdel['Дата']
-            row_quardoc[
-                'Номер АоРПИ'] = f'=HYPERLINK("{csv_to_pdf_path(row_izdel["ПутьФайла|"], row_izdel["Файл"])}", "{row_quardoc["Номер АоРПИ"]}")'
+            row_quardoc['Номер АоРПИ'] = create_hyperlink(row_izdel["ПутьФайла|"], row_izdel['Файл'], row_izdel['Номер'])
 
             # Наименование
             if row_quardoc['Наименование'] != row_izdel['НаимПродукции']:

@@ -1,4 +1,4 @@
-from def_folder.data_normalization import append_value as ap
+from def_folder.data_normalization import append_value as ap, create_hyperlink
 import copy
 
 
@@ -50,7 +50,7 @@ def reconciliation_data(kmd, aorpi, aook):
         row_kmd['Статус проверки'] = ''
         if row_kmd['Марка АоРПИ']:
             row_aorpi = aorpi[row_kmd['Марка АоРПИ'][0]]  # Строка в таблице АоРПИ
-            row_kmd['Номер АоРПИ'] = row_aorpi['Номер']
+            row_kmd['Номер АоРПИ'] = create_hyperlink(row_aorpi["ПутьФайла|"], row_aorpi['Файл'], row_aorpi['Номер'])
 
             # Наименование
             if row_kmd['Наименование'] != row_aorpi['НаимПродукции']:

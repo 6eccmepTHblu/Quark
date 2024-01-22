@@ -1,6 +1,6 @@
 import copy
 
-from def_folder.data_normalization import append_value as ap
+from def_folder.data_normalization import append_value as ap, create_hyperlink
 
 STATUS = {'Полное совпадение': 'Полное совпадение',
           'Количество': 'Количество',
@@ -51,6 +51,7 @@ def reconciliation_data(kmd, qualdoc, aook):
         row_kmd['Статус проверки'] = ''
         if row_kmd['Марка качества']:
             row_quardoc = qualdoc[row_kmd['Марка качества'][0]]  # Строка в таблице Качества
+            row_kmd['Номер документа'] = create_hyperlink(row_quardoc["ПутьФайла|"], row_quardoc['Файл'], row_quardoc['Номер документа'])
 
             # Наименование
             if row_kmd['Наименование'] != row_quardoc['Наименование']:

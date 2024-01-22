@@ -1,4 +1,4 @@
-from def_folder.data_normalization import append_value as ap
+from def_folder.data_normalization import append_value as ap, create_hyperlink
 from def_folder import data_collection as coll
 
 STATUS = {'Клеймо': 'Клеймо',
@@ -39,6 +39,7 @@ def reconciliation_data(jsr, csv):
         if row_jsr['Совп.Номер']:
             if row_jsr['Совп.Элемент']:
                 row_csv = csv[row_jsr['Совп.Элемент'][0]]  # Строка в таблице АоРПИ
+                row_jsr['Номер заключения'] = create_hyperlink(row_csv["ПутьФайла|"], row_csv['Файл'], row_jsr['Номер заключения'])
 
                 # НаимДетали
                 row_jsr['Расхождения'].append({'Тип': 'Свар.Элемент',
