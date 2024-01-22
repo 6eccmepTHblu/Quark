@@ -160,4 +160,8 @@ def csv_to_pdf_path(csv_path, name):
 def create_hyperlink(path_file, filename, name_pdf=None):
     if name_pdf is None:
         name_pdf = filename
+
+    if filename == '':
+        return f'=HYPERLINK("{path_file}", "{name_pdf}")'
+
     return f'=HYPERLINK("{csv_to_pdf_path(path_file, filename)}", "{name_pdf}")'

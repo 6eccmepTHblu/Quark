@@ -1,5 +1,7 @@
 import pandas as pd
 
+from def_folder.data_normalization import create_hyperlink
+
 STATUS = {'АОРПИ !=': 'АоРПИ не указан в АООК',
           'АООК !=': 'Не приложен АОРПИ',
           'АООК != дата': 'Дата АоРПИ не равна дате АоРПИ в АООК',
@@ -41,6 +43,11 @@ def reconciliation_data(aorpi, aook, date_aook):
 
     # Сверяем даты между собой
     for row in data_itog:
+        if row['Номер'] != '':
+            row['Номер'] = create_hyperlink(row["ПутьФайла"], row['Файл'], row['Номер'])
+        if row['АоРПИ Номер из АООК'] != '':
+            row['АоРПИ Номер из АООК'] = create_hyperlink(row["Путь файла АООК"], '', row['АоРПИ Номер из АООК'])
+
         if row['Номер'] == '':
             row['Статус проверки'] = STATUS['АООК !=']
         elif row['АоРПИ Номер из АООК'] == '':

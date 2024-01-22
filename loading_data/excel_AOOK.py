@@ -47,6 +47,7 @@ def get_data(path, mask, type_name):
 
     # Нормирование
     for row in reestr_aook:
+        row['Путь файла АООК'] = file
         if 'Номер/Дата' in row:
             # Дата
             date = row['Номер/Дата'].split('от')
