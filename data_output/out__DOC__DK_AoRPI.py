@@ -9,9 +9,11 @@ from data_reconciliation.rec__DOC__DK_AoRPI import STATUS
 from consts.colors import COLORS
 
 SHEET_NAME = "Комплектность"
-HEADERS = {'Номер документа': 'Номер ДК',
+HEADERS = {'Номер АоРПИ': 'Номер АоРПИ',
+           'Номер документа': 'Номер ДК',
            'Номер док.': 'Номера ДК в АоРПИ',
            'Дата отгрузки': 'Дата\nДК',
+           'Дата': 'Дата\nАоРПИ',
            'Статус проверки': 'Результат'}
 
 
@@ -30,16 +32,16 @@ def data_output(table, file_name):
 
     # Заголовок
     header_style = styles.RangeStyle(sh, 'Header_' + prefix_style, COLORS['Синий светлый'], size=13, bold=True)
-    header_style.apply_style(c1=ind, c2=ind+len(HEADERS)-1)
+    header_style.apply_style(c1=ind, c2=ind + len(HEADERS) - 1)
 
     # Таблица
     table_style = styles.RangeStyle(sh, 'Table_' + prefix_style, cell_color=COLORS['Зелёный светлый'])
-    table_style.apply_style(r1=2, r2=len(table), c1=ind, c2=ind+len(HEADERS)-1)
+    table_style.apply_style(r1=2, r2=len(table), c1=ind, c2=ind + len(HEADERS) - 1)
 
     # Результат
     result_style = styles.RangeStyle(sh, 'Result_' + prefix_style, cell_color=COLORS['Красный'], bold=True)
-    result_style.apply_style(r1=2, c1=ind+get_key(HEADERS, 'Статус проверки')-1, r2=len(table),
-                             c2=ind+get_key(HEADERS, 'Статус проверки')-1)
+    result_style.apply_style(r1=2, c1=ind + get_key(HEADERS, 'Статус проверки') - 1, r2=len(table),
+                             c2=ind + get_key(HEADERS, 'Статус проверки') - 1)
 
     # Общие
     styles.SheetStyle(sh, 65)
@@ -60,7 +62,7 @@ def data_output(table, file_name):
             {'Цвет': COLORS['Зелёный'], 'Диапазон': col(HEADERS, ["Статус проверки", "Статус проверки"], ind)}
         ],
         f'AND(ROW()>1, SEARCH("{STATUS["АООК < АоРПИ"]}",{col(HEADERS, "Статус проверки", ind)}))': [
-            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Дата отгрузки", "Дата отгрузки"], ind)}
+            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Дата отгрузки", "Дата"], ind)}
         ]
     }
     uf_color(uf, sh)

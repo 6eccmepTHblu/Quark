@@ -3,6 +3,8 @@ import traceback
 import os
 
 from sys import argv, exit
+
+from aсt_checking import create_act_checking, create_reports
 from def_folder import data_collection as fun
 from loading_data import excel_KMD, excel_AOOK, excel_JSR
 from data_reconciliation import (
@@ -23,7 +25,6 @@ from data_output import (
     out__DOC__DK_AOOK,
     out__DOC__DK_AoRPI
 )
-from data_output.data_in_excel import main as xl
 
 try:
     script, path = argv
@@ -38,7 +39,7 @@ def main():
     if os.path.exists(FAIL_NAME):
         os.remove(FAIL_NAME)
 
-    ### Собираем данные
+    # Собираем данные
     all_data = {
         'АОРПИ': fun.collects_data_by_type(path, ['АОРПИ Усть-Луга'], '-'),
         'АОРПИ изделия': fun.collects_data_by_type(path, ['АОРПИ Усть-Луга'], 'АОРПИ Усть-Луга изделия'),
@@ -53,18 +54,18 @@ def main():
         'ДК реестр': fun.collects_data_by_type(path, ['Документ о качестве'], '-')
     }
 
-    ### Сверки
+    # Сверки
     all_result_check = {
-        'Докум->КМД=АоРПИ':rec__DOC__DK_AoRPI.reconciliation_data(
+        'Докум->КМД=АоРПИ': rec__DOC__DK_AoRPI.reconciliation_data(
             all_data['ДК реестр'][:],
             all_data['АОРПИ докум'][:]
         ),
-        'Докум->КМД=АООК':rec__DOC__DK_AOOK.reconciliation_data(
+        'Докум->КМД=АООК': rec__DOC__DK_AOOK.reconciliation_data(
             all_data['ДК реестр'][:],
             all_data['АООК качество'][:],
             all_data['АООК дата']
         ),
-        'Докум->АоРПИ=АООК':rec__DOC__AoRPI_AOOK.reconciliation_data(
+        'Докум->АоРПИ=АООК': rec__DOC__AoRPI_AOOK.reconciliation_data(
             all_data['АОРПИ'][:],
             all_data['АООК ПКМ'][:],
             all_data['АООК дата']
@@ -90,7 +91,7 @@ def main():
         )
     }
 
-    ### Вывод в Excel
+    # Вывод в Excel
     out__KMD_AoRPI.data_output(all_result_check["АоРПИ=КМД"], FAIL_NAME)
     out__JSR_CSV.data_output(all_result_check["Заключения=ЖСР"], FAIL_NAME)
     out__quardoc_AoRPI.data_output(all_result_check["Качество=АоРПИ"], FAIL_NAME)
@@ -98,6 +99,12 @@ def main():
     out__DOC__AoRPI_AOOK.data_output(all_result_check["Докум->АоРПИ=АООК"], FAIL_NAME)
     out__DOC__DK_AOOK.data_output(all_result_check["Докум->КМД=АООК"], FAIL_NAME)
     out__DOC__DK_AoRPI.data_output(all_result_check["Докум->КМД=АоРПИ"], FAIL_NAME)
+
+    # Создаем акт проверки
+    data_reports = create_reports(all_result_check)
+    create_act_checking(FAIL_NAME,
+                        "LMK/80-050/KМ1-ОК/1",
+                        data_reports)
 
 
 if __name__ == "__main__":
