@@ -1,3 +1,5 @@
+import logging
+
 from def_folder.data_normalization import append_value as ap, create_hyperlink
 from def_folder import data_collection as coll
 
@@ -14,11 +16,11 @@ STATUS = {'Клеймо': 'Не соответствует клеймо',
 
 def reconciliation_data(jsr, csv):
     if not jsr:
-        print('!!! Данны по ЖСР отсутствуют!')
+        logging.warning(f"Сверка ЖСР с Заключениями НК не проведена! Данные по ЖСР отсутствуют!")
         return None
 
     if not csv:
-        print('!!! Данны по НК отсутствуют!')
+        logging.warning(f"Сверка ЖСР с Заключениями НК не проведена! Данные по НК отсутствуют!")
         return None
 
     # Сопаставление данных КМД с АоРПИ
@@ -27,7 +29,7 @@ def reconciliation_data(jsr, csv):
         row_jsr['Совп.Элемент'] = []
         for i, row_csv in enumerate(csv):
             if (str(row_jsr['Номер заключения']) == str(row_csv.get('Номер')) and
-                    row_jsr['Тип'] == row_csv.get('ТипФайла|')):
+                    row_jsr.get('Тип', "+") == row_csv.get('ТипФайла|', "-")):
                 row_jsr['Совп.Номер'].append(i)
                 if row_csv['НаимДетали'].lower() + ' ' in row_jsr['Свар.Элемент'].lower():
                     row_jsr['Совп.Элемент'].append(i)
@@ -101,5 +103,5 @@ def reconciliation_data(jsr, csv):
         if row_jsr['Статус проверки'] == '':
             row_jsr['Статус проверки'] = STATUS['Полное совпадение']
 
-    print('Сверка CSV(Заключений) с ЖСР произведена.')
+    logging.info(f"Сверка CSV(Заключений) с ЖСР произведена.")
     return jsr

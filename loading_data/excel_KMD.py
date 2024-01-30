@@ -1,3 +1,4 @@
+import logging
 import pprint
 from fnmatch import fnmatch
 
@@ -17,6 +18,7 @@ def get_data(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
     if file == '':
+        logging.warning(f"Не найден файл КМД - '{TEMPLATES}'")
         return None
 
     # Выбераем нужные столбцы, разбивая по словарю
@@ -37,7 +39,7 @@ def get_data(path):
             row['Марка'] = norm.transliteration_ru_en(row['Марка']).upper().replace(" ", "")
             row['Наименование'] = norm.transliteration_ru_en(row['Наименование'], 'ru').lower()
 
-    print('Данные из КМД собранны - ' + str(len(normal_data)) + '.')
+    logging.info('Данные из КМД собранны - ' + str(len(normal_data)) + '.')
     return normal_data
 
 

@@ -1,3 +1,5 @@
+import logging
+
 from Class import Excel_styles as styles
 
 from def_folder.excel_collection import get_number_key_in_dict as get_key
@@ -17,7 +19,7 @@ HEADERS = {'Марка': 'Марка из КМД',
 
 def data_output(table, file_name):
     if not table:
-        print('!!! Сврека КМД с АоРПИ отсутствует, лист не будет создан')
+        logging.warning(f"Сврека КМД с АоРПИ отсутствует, лист не будет создан!")
         return None
 
     wb, sh = get_list_in_excel(file_name, SHEET_NAME)

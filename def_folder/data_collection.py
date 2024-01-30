@@ -1,5 +1,6 @@
 import csv
 import glob
+import logging
 import os
 import pprint
 from datetime import datetime
@@ -211,7 +212,7 @@ def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = T
 
     for type in types:
         if type not in FILES:
-            print(f'Данного типа "{type}" нет в КОНСТАНТЕ!')
+            logging.warning(f'Данного типа "{type}" нет в КОНСТАНТЕ!')
             continue
 
         # Получаем данные по заголовкам
@@ -243,7 +244,7 @@ def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = T
                     data_csv = crossing_tables(data_table_csv, data_csv, 'СтраницаОбщая')
 
             # Если данные есть, вносим в общие данные
-            print(f'Данные из {data_dict["Маска"]} - [{table_csv_name}] собранны - ' + str(len(data_csv)) + '.')
+            logging.info(f'Данные из {data_dict["Маска"]} - [{table_csv_name}] собранны - {str(len(data_csv))}')
             if data_csv:
                 all_data += data_csv
 

@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 
 from def_folder.data_normalization import create_hyperlink
@@ -11,11 +13,11 @@ STATUS = {'АОРПИ !=': 'АоРПИ не указан в АООК',
 
 def reconciliation_data(aorpi, aook, date_aook):
     if not aorpi:
-        print('!!! Данны по АоРПИ отсутствуют!')
+        logging.warning(f"Сверка документов АООК с АоРПИ не проведена! Данные по АоРПИ отсутствуют!")
         return None
 
     if not aook:
-        print('!!! Данны по АООК отсутствуют!')
+        logging.warning(f"Сверка документов АООК с АоРПИ не проведена! Данные по АООК отсутствуют!")
         return None
 
     # Объединение по ключу
@@ -43,21 +45,23 @@ def reconciliation_data(aorpi, aook, date_aook):
 
     # Сверяем даты между собой
     for row in data_itog:
-        if row['Номер'] != '':
-            row['Номер'] = create_hyperlink(row["ПутьФайла"], row['Файл'], row['Номер'])
-        if row['АоРПИ Номер из АООК'] != '':
-            row['АоРПИ Номер из АООК'] = create_hyperlink(row["Путь файла АООК"], '', row['АоРПИ Номер из АООК'])
+        row['Акт проверки'] = []
 
         if row['Номер'] == '':
+            row['Акт проверки'].append(f"Не приложен АоРПИ №{row['АоРПИ Номер из АООК']} из АООК.")
             row['Статус проверки'] = STATUS['АООК !=']
         elif row['АоРПИ Номер из АООК'] == '':
+            row['Акт проверки'].append(f"АоРПИ №{row['Номер']} не указан в АООК.")
             row['Статус проверки'] = STATUS['АОРПИ !=']
         elif row['_Дата'] != row['_АоРПИ Дата из АООК']:
+            row['Акт проверки'].append(
+                f"Дата {row['АоРПИ Дата из АООК']} АОРПИ №{row['АоРПИ Номер из АООК']} не равна дате {row['Дата']} АОРПИ в АООК.")
             row['Статус проверки'] = STATUS['АООК != дата']
             row['Расхождения'].append({'Тип': 'Дата',
                                        'Рез': row['АоРПИ Дата из АООК'],
                                        'Преф': 'Дата из АООК: \n'})
         elif row['_Дата'] > row['_Дата АООК']:
+            row['Акт проверки'].append(f"ДК №{row['Номер документа']} не указан в АоРПИ.")
             row['Статус проверки'] = STATUS['АООК < АоРПИ']
             row['Расхождения'].append({'Тип': 'Дата',
                                        'Рез': f"{row['Дата']} > {row['Дата АООК']}",
@@ -65,4 +69,10 @@ def reconciliation_data(aorpi, aook, date_aook):
         else:
             row['Статус проверки'] = STATUS['Совпало']
 
+        if row['Номер'] != '':
+            row['Номер'] = create_hyperlink(row["ПутьФайла"], row['Файл'], row['Номер'])
+        if row['АоРПИ Номер из АООК'] != '':
+            row['АоРПИ Номер из АООК'] = create_hyperlink(row["Путь файла АООК"], '', row['АоРПИ Номер из АООК'])
+
+    logging.info(f"Сверка документов АООК с АоРПИ произведена.")
     return data_itog

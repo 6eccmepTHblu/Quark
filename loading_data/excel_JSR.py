@@ -1,3 +1,5 @@
+import logging
+
 import openpyxl
 import fnmatch
 import re
@@ -24,12 +26,13 @@ def get_data(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
     if file == '':
+        logging.warning(f"Не найден файл ЖСР - '{TEMPLATES}'")
         return None
 
-    # Открываем книгу АООК
+    # Открываем книгу ЖСР
     wb = openpyxl.load_workbook(file)
 
-    # Собираем реестры АООК
+    # Собираем реестры ЖСР
     reestr_jsr = []
     for sh in wb:
         if fnmatch.fnmatch(sh.title.lower(), SHEET_REESTR):
@@ -43,6 +46,9 @@ def get_data(path):
             for row in all_data[resul_rows:]:
                 row_data = {}
                 for key, item in headers.items():
+                    if type(item) is list:
+                        logging.warning(f'Заголовок "{HEADERS[key]}" - не был найден в ЖСР!')
+                        return reestr_jsr
                     row_data[key] = row[item]
                 data.append(row_data)
 
@@ -68,7 +74,8 @@ def get_data(path):
             # Тип
             if fnmatch.fnmatch(row['Заключения'], '*ВИК *'):
                 row['Тип'] = 'ВИК Лимак'
-            elif fnmatch.fnmatch(row['Заключения'], '*каппилярного*'):
+            elif (fnmatch.fnmatch(row['Заключения'], '*каппилярного*') or
+                  fnmatch.fnmatch(row['Заключения'], '*ПВК *')):
                 row['Тип'] = 'ПВК Лимак'
 
             # Дата
@@ -97,7 +104,7 @@ def get_data(path):
                 nambe = nambe[0]
             row['Номер заключения'] = nambe.replace(' ', '')
 
-    print('Данные из ЖСР собранны - ' + str(len(split_jsr)) + '.')
+    logging.info(f"Данные из ЖСР собранны - {str(len(split_jsr))}.")
     return split_jsr
 
 

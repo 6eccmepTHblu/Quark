@@ -1,3 +1,5 @@
+import logging
+
 from Class import Excel_styles as styles
 
 from def_folder.excel_collection import get_number_key_in_dict as get_key
@@ -18,7 +20,7 @@ HEADERS = {'Марка': 'Марка из КМД',
 
 def data_output(table, file_name):
     if not table:
-        print('!!! Сврека КМД с Качеством отсутствует, лист не будет создан')
+        logging.warning(f"Сврека КМД с ДК отсутствует, лист не будет создан!")
         return None
 
     wb, sh = get_list_in_excel(file_name, SHEET_NAME)
@@ -57,9 +59,7 @@ def data_output(table, file_name):
             {'Цвет': COLORS['Жёлтый'], 'Диапазон': col(HEADERS, ["Количество", "Количество"])}
         ],
         f'AND(ROW()>1, SEARCH("{STATUS["Марка"]}",{col(HEADERS, "Статус проверки")}))': [
-            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Марка", "Вес общий"])},
-            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Качества Номер из АООК",
-                                                                               "Качества Номер из АООК"])}
+            {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Марка", "Номер документа"])}
         ],
         f'AND(ROW()>1, SEARCH("{STATUS["Вес"]}",{col(HEADERS, "Статус проверки")}))': [
             {'Цвет': COLORS['Красный светлый'], 'Диапазон': col(HEADERS, ["Вес общий", "Вес общий"])}

@@ -1,3 +1,5 @@
+import logging
+
 import openpyxl
 import fnmatch
 
@@ -6,6 +8,7 @@ from def_folder import data_normalization as norm
 from def_folder import excel_collection as excel
 
 DATE_CELL = '*(дата составления акта)*'
+NUMBER_CELL = '*освидетельствования ответственных конструкций*'
 SHEET_REESTR = '*реестр*'
 TEMPLATES = ['*АООК*.xls*',
              '*Акт освидетельствования ответственных конструкций*.xls*']
@@ -18,6 +21,7 @@ def get_data(path, mask, type_name):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
     if file == '':
+        logging.warning(f"Не найден файл АООК - '{TEMPLATES}'")
         return None
 
     # Открываем книгу АООК
@@ -37,6 +41,9 @@ def get_data(path, mask, type_name):
             for row in all_data[resul_rows:]:
                 row_data = {}
                 for key, item in headers.items():
+                    if type(item) is list:
+                        logging.warning(f'Заголовок "{HEADERS[key]}" - не был найден в АООК!')
+                        return reestr_aook
                     row_data[key] = row[item]
                 data.append(row_data)
 
@@ -60,13 +67,15 @@ def get_data(path, mask, type_name):
             nambe = row['Номер/Дата'].split('от')[0].strip().replace('№', '')
             row[f'{type_name} Номер из АООК'] = norm.transliteration_ru_en(nambe).upper()
 
-    print('Данные из АООК собранны - ' + str(len(reestr_aook)) + '.')
+    logging.info('Данные из АООК собранны - ' + str(len(reestr_aook)) + '.')
     return reestr_aook
+
 
 def get_date(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
     if file == '':
+        logging.warning(f"Не найден файл АООК - '{TEMPLATES}'")
         return None
 
     # Открываем книгу АООК
@@ -87,10 +96,38 @@ def get_date(path):
     # Нормируем дату АООК
     data_aook = data_aook.replace('"', '').replace('г.', '').strip()
     data_aook = norm.get_date(data_aook)
-    print("Дата АООК:", data_aook)
 
+    logging.info(f"Дата АООК: {data_aook}")
     return data_aook
 
 
+def get_number(path):
+    # Найти файл
+    file = fun.find_file(path, TEMPLATES)
+    if file == '':
+        logging.warning(f"Не найден файл АООК - '{TEMPLATES}'")
+        return None
+
+    # Открываем книгу АООК
+    wb = openpyxl.load_workbook(file)
+
+    # Находим номер АООК
+    sh = wb[excel.find_sheet(wb, '*АООК*')[0]]
+    number_aook = ''
+    for row in sh.iter_rows():
+        for cell in row:
+            if fnmatch.fnmatch(str(cell.value), NUMBER_CELL):
+                # Если нашли ячейку со значением "дата", то берем значение из строки выше
+                number_aook = sh.cell(row=cell.row + 2, column=cell.column).value
+                break
+        if number_aook:
+            break
+
+    # Нормируем дату АООК
+    logging.info(f"Номер АООК: {number_aook}")
+
+    return number_aook
+
+
 if __name__ == '__main__':
-    get_data('D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные')
+    get_number('D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 4')

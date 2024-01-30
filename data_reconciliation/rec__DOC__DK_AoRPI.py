@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 
 from def_folder.data_normalization import create_hyperlink
@@ -11,11 +13,11 @@ STATUS = {'АОРПИ !=': 'Не приложен ДК',
 
 def reconciliation_data(dk, aorpi):
     if not dk:
-        print('!!! Данны по ДК отсутствуют!')
+        logging.warning(f"Сверка документов ДК с АоРПИ не проведена! Данные по ДК отсутствуют!")
         return None
 
     if not aorpi:
-        print('!!! Данны по АоРПИ отсутствуют!')
+        logging.warning(f"Сверка документов ДК с АоРПИ не проведена! Данные по АоРПИ отсутствуют!")
         return None
 
     # Объединение по ключу
@@ -36,7 +38,7 @@ def reconciliation_data(dk, aorpi):
     # Преобразуем даты в даты
     data_itog['_Дата док.'] = pd.to_datetime(data_itog['Дата док.'], format='%d.%m.%Y', errors='coerce')
     data_itog['_Дата отгрузки'] = pd.to_datetime(data_itog['Дата отгрузки'], format='%d.%m.%Y',
-                                                         errors='coerce')
+                                                 errors='coerce')
 
     # Конвертируем данные в лист словарей
     data_itog['Расхождения'] = data_itog.apply(lambda row: [], axis=1)
@@ -45,17 +47,17 @@ def reconciliation_data(dk, aorpi):
 
     # Сверяем даты между собой
     for row in data_itog:
-        row['Номер АоРПИ'] = create_hyperlink(row["ПутьФайла|"], row['Файл_2'], row['Номер'])
-        if row['Номер документа'] != '':
-            row['Номер документа'] = create_hyperlink(row["ПутьФайла_1"], row['Файл_1'], row['Номер документа'])
-        if row['Номер док.'] != '':
-            row['Номер док.'] = create_hyperlink(row["ПутьФайла|"], row['Файл_2'], row['Номер док.'])
+        row['Акт проверки'] = []
 
         if row['Номер док.'] == '':
+            row['Акт проверки'].append(f"Документ о качестве №{row['Номер документа']} не указан в АоРПИ.")
             row['Статус проверки'] = STATUS['АООК !=']
         elif row['Номер документа'] == '':
+            row['Акт проверки'].append(f"Не приложен документ о качестве №{row['Номер док.']} из АоРПИ №{row['Номер']}.")
             row['Статус проверки'] = STATUS['АОРПИ !=']
         elif row['_Дата док.'] != row['_Дата отгрузки']:
+            row['Акт проверки'].append(
+                f"Дата {row['Дата отгрузки']} документа о качестве №{row['Номер документа']} не равна дате {row['Дата док.']} документа о качестве в АоРПИ №{row['Номер']}.")
             row['Статус проверки'] = STATUS['АООК != дата']
             row['Расхождения'].append({'Тип': 'Дата док.',
                                        'Рез': row['Дата отгрузки'],
@@ -63,4 +65,13 @@ def reconciliation_data(dk, aorpi):
         else:
             row['Статус проверки'] = STATUS['Совпало']
 
+        row['Номер АоРПИ'] = create_hyperlink(row["ПутьФайла|"], row['Файл_2'], row['Номер'])
+
+        if row['Номер документа'] != '':
+            row['Номер документа'] = create_hyperlink(row["ПутьФайла_1"], row['Файл_1'], row['Номер документа'])
+
+        if row['Номер док.'] != '':
+            row['Номер док.'] = create_hyperlink(row["ПутьФайла|"], row['Файл_2'], row['Номер док.'])
+
+    logging.info(f"Сверка документов ДК с АоРПИ произведена.")
     return data_itog

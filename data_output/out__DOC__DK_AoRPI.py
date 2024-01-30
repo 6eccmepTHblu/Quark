@@ -1,3 +1,5 @@
+import logging
+
 from Class import Excel_styles as styles
 
 from def_folder.excel_collection import get_number_key_in_dict as get_key
@@ -12,19 +14,20 @@ SHEET_NAME = "Комплектность"
 HEADERS = {'Номер АоРПИ': 'Номер АоРПИ',
            'Номер документа': 'Номер ДК',
            'Номер док.': 'Номера ДК в АоРПИ',
-           'Дата отгрузки': 'Дата\nДК',
-           'Дата': 'Дата\nАоРПИ',
+           'Дата отгрузки': 'Дата ДК',
+           'Дата': 'Дата АоРПИ',
            'Статус проверки': 'Результат'}
 
 
-def data_output(table, file_name):
+def data_output(table, file_name, date_aook):
     if not table:
-        print('!!! Сврека ДК с АоРПИ отсутствует, лист не будет создан')
+        logging.warning(f"Сврека ДК с АоРПИ отсутствует, лист не будет создан!")
         return None
 
     wb, sh = get_list_in_excel(file_name, SHEET_NAME, one_sheet=True)
     ind = sh.max_column + 2
 
+    # HEADERS['Дата'] += str(f'АООК {date_aook}')
     enter_data_on_the_sheet(table, HEADERS, sh, c1=ind)
 
     # Настройка визуальной части

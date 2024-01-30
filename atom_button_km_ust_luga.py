@@ -29,7 +29,7 @@ from data_output import (
 try:
     script, path = argv
 except:
-    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 4'
+    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 6'
 
 FAIL_NAME = os.path.join(path, "Акт промежуточной проверки.xlsx")
 
@@ -45,6 +45,7 @@ def main():
         'АОРПИ изделия': fun.collects_data_by_type(path, ['АОРПИ Усть-Луга'], 'АОРПИ Усть-Луга изделия'),
         'АОРПИ докум': fun.collects_data_by_type(path, ['АОРПИ Усть-Луга'], 'АОРПИ Усть-Луга сопр.док.'),
         'АООК дата': excel_AOOK.get_date(path),
+        'АООК номер': excel_AOOK.get_number(path),
         'АООК ПКМ': excel_AOOK.get_data(path, '*акт о проведении контрольного мероприятия*', 'АоРПИ'),
         'АООК качество': excel_AOOK.get_data(path, '*документ о качестве стальных*', 'Качества'),
         'КМД': excel_KMD.get_data(path),
@@ -57,37 +58,37 @@ def main():
     # Сверки
     all_result_check = {
         'Докум->КМД=АоРПИ': rec__DOC__DK_AoRPI.reconciliation_data(
-            all_data['ДК реестр'][:],
-            all_data['АОРПИ докум'][:]
+            all_data['ДК реестр'],
+            all_data['АОРПИ докум']
         ),
         'Докум->КМД=АООК': rec__DOC__DK_AOOK.reconciliation_data(
-            all_data['ДК реестр'][:],
-            all_data['АООК качество'][:],
+            all_data['ДК реестр'],
+            all_data['АООК качество'],
             all_data['АООК дата']
         ),
         'Докум->АоРПИ=АООК': rec__DOC__AoRPI_AOOK.reconciliation_data(
-            all_data['АОРПИ'][:],
-            all_data['АООК ПКМ'][:],
+            all_data['АОРПИ'],
+            all_data['АООК ПКМ'],
             all_data['АООК дата']
         ),
         'АоРПИ=КМД': rec__KMD_AoRPI.reconciliation_data(
-            all_data['КМД'][:],
-            all_data['АОРПИ изделия'][:],
-            all_data['АООК ПКМ'][:]
+            all_data['КМД'],
+            all_data['АОРПИ изделия'],
+            all_data['АООК ПКМ']
         ),
         'Заключения=ЖСР': rec__JSR_CSV.reconciliation_data(
-            all_data['ЖСР'][:],
-            all_data['Заключения'][:]
+            all_data['ЖСР'],
+            all_data['Заключения']
         ),
         'Качество=АоРПИ': rec__quardoc_AoRPI.reconciliation_data(
-            all_data['ДК'[:]],
-            all_data['АОРПИ изделия'][:],
-            all_data['АОРПИ докум'][:]
+            all_data['ДК'],
+            all_data['АОРПИ изделия'],
+            all_data['АОРПИ докум']
         ),
         'Качество=КМД': rec__KMD_quardoc.reconciliation_data(
-            all_data['КМД'][:],
-            all_data['ДК'][:],
-            all_data['АООК качество'][:]
+            all_data['КМД'],
+            all_data['ДК'],
+            all_data['АООК качество']
         )
     }
 
@@ -96,24 +97,28 @@ def main():
     out__JSR_CSV.data_output(all_result_check["Заключения=ЖСР"], FAIL_NAME)
     out__quardoc_AoRPI.data_output(all_result_check["Качество=АоРПИ"], FAIL_NAME)
     out__KMD_qualdoc.data_output(all_result_check["Качество=КМД"], FAIL_NAME)
-    out__DOC__AoRPI_AOOK.data_output(all_result_check["Докум->АоРПИ=АООК"], FAIL_NAME)
-    out__DOC__DK_AOOK.data_output(all_result_check["Докум->КМД=АООК"], FAIL_NAME)
-    out__DOC__DK_AoRPI.data_output(all_result_check["Докум->КМД=АоРПИ"], FAIL_NAME)
+    out__DOC__AoRPI_AOOK.data_output(all_result_check["Докум->АоРПИ=АООК"], FAIL_NAME, all_data['АООК дата'])
+    out__DOC__DK_AOOK.data_output(all_result_check["Докум->КМД=АООК"], FAIL_NAME, all_data['АООК дата'])
+    out__DOC__DK_AoRPI.data_output(all_result_check["Докум->КМД=АоРПИ"], FAIL_NAME, all_data['АООК дата'])
 
     # Создаем акт проверки
     data_reports = create_reports(all_result_check)
     create_act_checking(FAIL_NAME,
-                        "LMK/80-050/KМ1-ОК/1",
+                        all_data['АООК номер'],
                         data_reports)
 
 
 if __name__ == "__main__":
     try:
+        file_log = logging.FileHandler(path + '\\Лог работы скрипта.txt', mode='w')
+        console_out = logging.StreamHandler()
+        logging.basicConfig(handlers=(file_log, console_out), level=logging.INFO,
+                            format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.info(f"Путь реестра - '{path}'")
         main()
     except Exception as ex:
         # Настройка конфигурации логирования
-        logging.basicConfig(filename=path + '\\Отчет об ошибках.txt', level=logging.ERROR,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
         print('Ошибка:\n', traceback.format_exc())
+        logging.error("====================================================================")
         logging.exception("Произошла ошибка: %s", str(ex))
         exit(1)
