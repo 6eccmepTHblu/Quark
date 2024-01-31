@@ -3,7 +3,7 @@ import traceback
 import os
 
 from sys import argv, exit
-
+from data_output.data_in_excel import main as xl
 from aсt_checking import create_act_checking, create_reports
 from def_folder import data_collection as fun
 from loading_data import excel_KMD, excel_AOOK, excel_JSR
@@ -29,7 +29,7 @@ from data_output import (
 try:
     script, path = argv
 except:
-    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 6'
+    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 3'
 
 FAIL_NAME = os.path.join(path, "Акт промежуточной проверки.xlsx")
 
@@ -100,6 +100,17 @@ def main():
     out__DOC__AoRPI_AOOK.data_output(all_result_check["Докум->АоРПИ=АООК"], FAIL_NAME, all_data['АООК дата'])
     out__DOC__DK_AOOK.data_output(all_result_check["Докум->КМД=АООК"], FAIL_NAME, all_data['АООК дата'])
     out__DOC__DK_AoRPI.data_output(all_result_check["Докум->КМД=АоРПИ"], FAIL_NAME, all_data['АООК дата'])
+
+    # Добовляем данные в книгу
+    xl(FAIL_NAME, 'АОРПИ изделия', all_data['АОРПИ изделия'])
+    xl(FAIL_NAME, 'АОРПИ', all_data['АОРПИ'])
+    xl(FAIL_NAME, 'АОРПИ докум', all_data['АОРПИ докум'])
+    xl(FAIL_NAME, 'АООК ПКМ', all_data['АООК ПКМ'])
+    xl(FAIL_NAME, 'КМД', all_data['КМД'])
+    xl(FAIL_NAME, 'Заключения', all_data['Заключения'])
+    xl(FAIL_NAME, 'ЖСР', all_data['ЖСР'])
+    xl(FAIL_NAME, 'ДК', all_data['ДК'])
+    xl(FAIL_NAME, 'ДК реестр', all_data['ДК реестр'])
 
     # Создаем акт проверки
     data_reports = create_reports(all_result_check)

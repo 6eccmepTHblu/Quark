@@ -34,8 +34,7 @@ def normalization_of_data_by_headers(table: list[dict], headers: dict, type_name
 
                 # Нормирование данных
                 if 'Номер' == check:
-                    if type_name == 'Документ о качестве':
-                        row[key] = norm.transliteration_ru_en(row[key]).upper()
+                    row[key] = norm.transliteration_ru_en(row[key]).upper()
 
                 elif 'НомерАоРПИ' == check:
                     if row[key] == '':
@@ -106,6 +105,9 @@ def normalisation_par_type_de_fichier(table: list, type_file: str) -> list:
 
     if not type_file or not table:
         return table
+
+    if 'АОРПИ Усть-Луга сопр.док.' in type_file:
+        table[:] = [row for row in table if 'качестве стальных' in row.get('Тип док.', '+')]
 
     if 'Документ о качестве таблица' in type_file:
         table[:] = [row for row in table if row.get('Марка', '+') != '']

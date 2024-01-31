@@ -1,7 +1,7 @@
 import logging
-
 import openpyxl
 import fnmatch
+import re
 
 from def_folder import data_collection as fun
 from def_folder import data_normalization as norm
@@ -63,12 +63,21 @@ def get_data(path, mask, type_name):
             else:
                 date = date[0]
             row[f'{type_name} Дата из АООК'] = norm.get_date(date)
+
             # Номер
             nambe = row['Номер/Дата'].split('от')[0].strip().replace('№', '')
-            row[f'{type_name} Номер из АООК'] = norm.transliteration_ru_en(nambe).upper()
+            nambe = norm.transliteration_ru_en(nambe).upper()
+            nambe = delete_in_brackets(nambe)
+            row[f'{type_name} Номер из АООК'] = nambe
 
     logging.info('Данные из АООК собранны - ' + str(len(reestr_aook)) + '.')
     return reestr_aook
+
+def delete_in_brackets(text: str) -> str:
+        # Используем регулярное выражение для поиска и удаления содержимого в скобках
+        pattern = re.compile(r'\([^)]*\)')
+        result = re.sub(pattern, '', text)
+        return result
 
 
 def get_date(path):

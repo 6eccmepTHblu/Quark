@@ -1,3 +1,4 @@
+import logging
 import os
 import openpyxl
 
@@ -9,12 +10,12 @@ from consts.colors import COLORS
 
 def main(path, sheet_name, table):
     if not table:
-        print(f'!!! Данные "{sheet_name}" отсутствуют, лист не будет создан!')
+        logging.warning(f'Данные "{sheet_name}" отсутствуют, лист не будет создан!')
         return None
 
     # Проверяем, существует ли файл
     if not os.path.exists(path):
-        print(f'Книга "{path}" не найдена')
+        logging.warning(f'Книга "{path}" не найдена')
         return ''
 
     wb = openpyxl.load_workbook(path)  # Подгрузить гингу
@@ -46,6 +47,6 @@ def main(path, sheet_name, table):
 
     try:
         wb.save(path)  # Сохраняем книгу
-        print('  Лист "' + sheet_name + '" создан!')
+        logging.info(f'Лист БД "' + sheet_name + '" добавлен и скрыт!')
     except:
         print('!!! Не удалось создать лист "' + sheet_name + '"')

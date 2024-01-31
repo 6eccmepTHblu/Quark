@@ -24,7 +24,7 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
         logging.warning(f"Сверка ДК с АоРПИ не проведена! Данные по АоРПИ документы отсутствуют!")
         return []
 
-    # Скрещивание строк по марке
+    # Скрещивание строк по марке ДК
     df = pd.DataFrame(quardoc)
     df['Количество'] = pd.to_numeric(df['Количество'], errors='coerce')
     quardoc = df.groupby(['Марка', 'Наименование']).agg({
@@ -34,6 +34,17 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
            col not in ['Марка', 'Наименование', 'Количество', 'Номер АоРПИ', 'Номер документа']}
     }).reset_index()
     quardoc = quardoc.to_dict(orient='records')
+
+    # Скрещивание строк по марке АоРПИ
+    df = pd.DataFrame(aorpi_izdel)
+    df['Количество'] = pd.to_numeric(df['Количество'], errors='coerce')
+    aorpi_izdel = df.groupby(['Марка', 'НаимПродукции']).agg({
+        'Количество': 'sum',
+        'Номер': lambda x: ', '.join(x.astype(str).unique()),
+        **{col: 'first' for col in df.columns if
+           col not in ['Марка', 'НаимПродукции', 'Количество', 'Номер']}
+    }).reset_index()
+    aorpi_izdel = aorpi_izdel.to_dict(orient='records')
 
     # Сопаставление данных качество с изделиями
     for row_quardoc in quardoc:
