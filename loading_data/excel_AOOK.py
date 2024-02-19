@@ -8,10 +8,12 @@ from def_folder import data_normalization as norm
 from def_folder import excel_collection as excel
 
 DATE_CELL = '*(дата составления акта)*'
-NUMBER_CELL = '*освидетельствования ответственных конструкций*'
+NUMBER_CELL = [['*освидетельствования строительных конструкций*', 2, 1],
+               ['*освидетельствования скрытых работ*', 1, 1]]
 SHEET_REESTR = '*реестр*'
 TEMPLATES = ['*АООК*.xls*',
-             '*Акт освидетельствования ответственных конструкций*.xls*']
+             '*Акт освидетельствования ответственных конструкций*.xls*',
+             '*АОСР*.xls*']
 HEADERS = {'Пункт': '№ п/п',
            'ИД': '*документ*',
            'Номер/Дата': '*Реквизит*'}
@@ -73,11 +75,12 @@ def get_data(path, mask, type_name):
     logging.info('Данные из АООК собранны - ' + str(len(reestr_aook)) + '.')
     return reestr_aook
 
+
 def delete_in_brackets(text: str) -> str:
-        # Используем регулярное выражение для поиска и удаления содержимого в скобках
-        pattern = re.compile(r'\([^)]*\)')
-        result = re.sub(pattern, '', text)
-        return result
+    # Используем регулярное выражение для поиска и удаления содержимого в скобках
+    pattern = re.compile(r'\([^)]*\)')
+    result = re.sub(pattern, '', text)
+    return result
 
 
 def get_date(path):
@@ -91,19 +94,24 @@ def get_date(path):
     wb = openpyxl.load_workbook(file)
 
     # Находим дату АООК
-    sh = wb[excel.find_sheet(wb, '*АООК*')[0]]
+    sh = wb.active
     data_aook = ''
     for row in sh.iter_rows():
         for cell in row:
             if fnmatch.fnmatch(str(cell.value), DATE_CELL):
                 # Если нашли ячейку со значением "дата", то берем значение из строки выше
                 data_aook = sh.cell(row=cell.row - 1, column=cell.column).value
+                if data_aook is None:
+                    data_aook = sh.cell(row=cell.row - 1, column=cell.column - 1).value
                 break
         if data_aook:
             break
 
     # Нормируем дату АООК
-    data_aook = data_aook.replace('"', '').replace('г.', '').strip()
+    data_aook = norm.get_date(data_aook)
+    data_aook = data_aook.replace('"', '').replace('г.', '').replace('-', '.')
+    if ' ' in data_aook:
+        data_aook = data_aook.split(' ')[0].strip()
     data_aook = norm.get_date(data_aook)
 
     logging.info(f"Дата АООК: {data_aook}")
@@ -121,14 +129,14 @@ def get_number(path):
     wb = openpyxl.load_workbook(file)
 
     # Находим номер АООК
-    sh = wb[excel.find_sheet(wb, '*АООК*')[0]]
+    sh = wb.active
     number_aook = ''
     for row in sh.iter_rows():
         for cell in row:
-            if fnmatch.fnmatch(str(cell.value), NUMBER_CELL):
-                # Если нашли ячейку со значением "дата", то берем значение из строки выше
-                number_aook = sh.cell(row=cell.row + 2, column=cell.column).value
-                break
+            for number in NUMBER_CELL:
+                if fnmatch.fnmatch(str(cell.value), number[0]):
+                    number_aook = sh.cell(row=cell.row + number[1], column=cell.column + number[2]).value
+                    break
         if number_aook:
             break
 

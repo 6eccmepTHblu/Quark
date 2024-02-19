@@ -1,6 +1,7 @@
 import fnmatch
 import os
 import re
+from datetime import datetime
 
 
 def take_out_the_stamp(text):
@@ -58,12 +59,15 @@ def delete_symbol_in_start(text, symbol):
 
 
 def get_date(date_temp):
-    date = normalize_date(date_temp)
-    date = re.search(r"(\d+\.?\d+\.?\d+)", date)
-    if date:
-        return date.group(1)
+    if isinstance(date_temp, datetime):
+        return date_temp.strftime("%d-%m-%Y")
     else:
-        return '"' + date_temp + '"'
+        date = normalize_date(date_temp)
+        date = re.search(r"(\d+\.?\d+\.?\d+)", date)
+        if date:
+            return date.group(1)
+        else:
+            return '"' + date_temp + '"'
 
 
 def normalize_date(date_temp):

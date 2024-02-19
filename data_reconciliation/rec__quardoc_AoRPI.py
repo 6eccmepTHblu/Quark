@@ -87,7 +87,10 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
                                                    'Рез': row_izdel['Количество'],
                                                    'Преф': 'Количество из АоРПИ: \n'})
 
-            row_quardoc['Номер АоРПИ'] = create_hyperlink(row_izdel["ПутьФайла|"], row_izdel['Файл'], row_izdel['Номер'])
+            if len(row_izdel['Номер']) < 250:
+                row_quardoc['Номер АоРПИ'] = create_hyperlink(row_izdel["ПутьФайла|"], row_izdel['Файл'], row_izdel['Номер'])
+            else:
+                row_quardoc['Номер АоРПИ'] = row_izdel['Номер']
         else:
             row_quardoc['Статус проверки'] = STATUS['Марка']
             row_quardoc['Акт проверки'].append(

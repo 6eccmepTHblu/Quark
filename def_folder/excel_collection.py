@@ -1,3 +1,5 @@
+import logging
+
 import openpyxl
 import fnmatch
 import os
@@ -164,9 +166,8 @@ def get_data_by_headers(table, headers):
     date = []
     if table and headers:
         normal_headers, row_result = find_headers(table, headers)
-        a = normal_headers.items()
         if any(isinstance(value, list) and not value for value in normal_headers.values()):
-            print(f'Не найдены заголовки - {normal_headers}!')
+            logging.warning(f'Не найдены заголовки - {normal_headers}!')
             return date
 
         if normal_headers:

@@ -38,7 +38,7 @@ def create_reports(table: dict):
         error_num = 0
         if value:
             for row in value:
-                if row.get('Акт проверки', []):
+                if row.get('Акт проверки', []) and isinstance(row.get('Акт проверки', []), list):
                     error_num += 1
                     data_filter.append(row['Акт проверки'][0])
             logging.info(f"'{key}' найдено замечаний - {error_num}.")

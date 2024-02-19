@@ -12,7 +12,7 @@ from consts.colors import COLORS
 
 SHEET_NAME = "Комплектность"
 HEADERS = {'Номер документа': 'Номер ДК',
-           'Качества Номер из АООК': 'Номера ДК в АООК',
+           'Качества Номер из АООК': 'Номера ДК в АООК/АОСР',
            'Дата отгрузки': 'Дата ДК',
            'Статус проверки': 'Результат'}
 
@@ -25,7 +25,7 @@ def data_output(table, file_name, date_aook):
     wb, sh = get_list_in_excel(file_name, SHEET_NAME, one_sheet=True)
     ind = sh.max_column + 2
 
-    HEADERS['Дата отгрузки'] += str(f'\nАООК {date_aook}')
+    HEADERS['Дата отгрузки'] += str(f'\nАООК/АОСР {date_aook}')
     enter_data_on_the_sheet(table, HEADERS, sh, c1=ind)
 
     # Настройка визуальной части

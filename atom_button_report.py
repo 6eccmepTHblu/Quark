@@ -16,7 +16,7 @@ from tkinter import simpledialog
 try:
     script, path = argv
 except:
-    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Авансовый 4'
+    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Авансовый 5'
 
 FAIL_NAME = os.path.join(path, "Отчет.xlsx")
 
@@ -36,7 +36,7 @@ def reconciles_documents_report():
     data_report_result = norm.normalisation_par_type_de_fichier(data_report_result, 'Авансовый отчет таблица')
 
     # Распределение данных по итогам
-    for row in data_report_result:
+    for i, row in enumerate(data_report_result):
         list_data = []
         row['ТаблицаИтого'] = ''
         for row_2 in data_report:

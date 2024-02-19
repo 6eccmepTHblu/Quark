@@ -7,10 +7,10 @@ from def_folder import data_normalization as norm
 from def_folder import excel_collection as excel
 from def_folder.normalization import normalization_of_data_by_headers
 
-HEADERS = {'Марка': ['*Отправочная марка*','*марка*'],
-           'Наименование': ['*Наименование марки*', '*Наименование*'],
+HEADERS = {'Марка': ['*Отправочная марка*','*марка*', 'No сборки'],
+           'Наименование': ['*Наименование марки*', '*Наименование*', 'Название*'],
            'Количество': ['*Количество*', '*Кол-во*'],
-           'Вес общий': ['*Всех*', '*Вес*']}
+           'Вес общий': ['*Всех*', '*Вес*', 'Масса, кг']}
 TEMPLATES = ['*КМД*.xls*']
 
 

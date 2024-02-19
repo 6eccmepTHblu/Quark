@@ -132,7 +132,7 @@ def normalisation_par_type_de_fichier(table: list, type_file: str) -> list:
                 if len(filter_data) == 1:
                     result_data += filter_data
                 else:
-                    result_data += list_data[-1]
+                    result_data.append(list_data[-1])
         table[:] = result_data
 
     return table

@@ -2,22 +2,22 @@ import csv
 import glob
 import logging
 import os
-import pprint
+
 from datetime import datetime
 from fnmatch import fnmatch
 from consts.files import FILES
+from def_folder.excel_collection import find_headers
 from def_folder.normalization import (normalisation_par_type_de_fichier,
                                       normalization_of_data_by_headers)
 
 
-def get_data_in_csv(list_csv: list, indent: int = 1, name: bool = True, take_strio: bool = True) -> list:
+def get_data_in_csv(list_csv: list, name: bool = True, take_strio: bool = True) -> list:
     """
     **Функция `get_data_in_csv`**
     Эта функция считывает данные из файлов CSV, объединяет их в список и возвращает полученные данные.
 
     **Параметры**
     - `list_csv` (список): Список имен файлов CSV для чтения данных.
-    - `indent` (целое число): Отступ, добавляемый к каждой строке данных. По умолчанию установлен в 1.
     - `name` (булево значение): Если установлено в `True`, добавляет в начало списка имя файла.
             По умолчанию установлено в `True`.
 
@@ -47,7 +47,7 @@ def get_data_in_csv(list_csv: list, indent: int = 1, name: bool = True, take_str
                     temp_list = [[str(cell) for cell in row] for row in file_contents]
                 if name:  # Если name = True, добавляет в начало списка имя файла
                     temp_list = [row + [file_name]  for row in temp_list]
-                element_list.extend(temp_list[indent:])
+                element_list.extend(temp_list[:])
             except csv.Error as e:
                 print(f"Ошибка при чтении файла {file_name}: {e}")
 
@@ -140,6 +140,13 @@ def separate_collumns_of_headers(all_data: list[list], headers: dict, group: str
             if isinstance(item, list):
                 item = item[0]
             try:
+                if isinstance(item, str):
+                    hed = item
+                    item, _ = find_headers(all_data, {"name": item})
+                    item = item["name"]
+                    if isinstance(item, list):
+                        logging.warning(f'Не найдены заголовки - "{hed}" в "{group}"!')
+                        return []
                 temp_dict[key] = row[item] if len(row) > item else ''
             except IndexError:
                 temp_dict[key] = ''
@@ -255,10 +262,11 @@ def get_data_from_csv(path, masks, headers, indent, group, norml):
     list_files = get_list_files(path, masks)
 
     # Собираем все данные из выбранных файлов
-    all_data = get_data_in_csv(list_files, indent)
+    all_data = get_data_in_csv(list_files)
 
     # Выбераем нужные столбцы, разбивая по словарю
     data = separate_collumns_of_headers(all_data, headers, group)
+    data = data[indent:]
 
     # Нормализация данных по типу
     if norml:
