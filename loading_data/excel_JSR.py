@@ -7,6 +7,7 @@ import re
 from def_folder import data_collection as fun
 from def_folder import data_normalization as norm
 from def_folder import excel_collection as excel
+from def_folder import normalization
 
 TEMPLATES = ['*ЖСР*.xls*',
              '*Журнал сварочных работ*.xls*']
@@ -25,6 +26,7 @@ RESULT = ['не годен',
 def get_data(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
+    logging.info('Сбор данных из ЖСР.')
     if file == '':
         logging.warning(f"Не найден файл ЖСР - '{TEMPLATES}'")
         return None
@@ -104,7 +106,8 @@ def get_data(path):
                 nambe = nambe[0]
             row['Номер заключения'] = nambe.replace(' ', '')
 
-    logging.info(f"Данные из ЖСР собранны - {str(len(split_jsr))}.")
+    logging.info(f"     Данные из ЖСР собранны - {str(len(split_jsr))}.")
+    split_jsr = normalization.normalisation_par_type_de_fichier(split_jsr, 'ЖСР')
     return split_jsr
 
 

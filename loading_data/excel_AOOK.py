@@ -22,6 +22,7 @@ HEADERS = {'Пункт': '№ п/п',
 def get_data(path, mask, type_name):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
+    logging.info('Сбор данных из АООК.')
     if file == '':
         logging.warning(f"Не найден файл АООК - '{TEMPLATES}'")
         return None
@@ -72,7 +73,7 @@ def get_data(path, mask, type_name):
             nambe = delete_in_brackets(nambe)
             row[f'{type_name} Номер из АООК'] = nambe
 
-    logging.info('Данные из АООК собранны - ' + str(len(reestr_aook)) + '.')
+    logging.info('      Данные из АООК собранны - ' + str(len(reestr_aook)) + '.')
     return reestr_aook
 
 
@@ -94,7 +95,7 @@ def get_date(path):
     wb = openpyxl.load_workbook(file)
 
     # Находим дату АООК
-    sh = wb.active
+    sh = wb.sheetnames[0]
     data_aook = ''
     for row in sh.iter_rows():
         for cell in row:
@@ -129,7 +130,7 @@ def get_number(path):
     wb = openpyxl.load_workbook(file)
 
     # Находим номер АООК
-    sh = wb.active
+    sh = wb.sheetnames[0]
     number_aook = ''
     for row in sh.iter_rows():
         for cell in row:

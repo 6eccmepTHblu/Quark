@@ -29,7 +29,7 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
     df['Количество'] = pd.to_numeric(df['Количество'], errors='coerce')
     quardoc = df.groupby(['Марка', 'Наименование']).agg({
         'Количество': 'sum',
-        'Номер документа': lambda x: ', '.join(x.astype(str).unique()),
+        'Номер документа': lambda x: ', '.join(x.astype(str)),
         **{col: 'first' for col in df.columns if
            col not in ['Марка', 'Наименование', 'Количество', 'Номер АоРПИ', 'Номер документа']}
     }).reset_index()
@@ -40,7 +40,7 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
     df['Количество'] = pd.to_numeric(df['Количество'], errors='coerce')
     aorpi_izdel = df.groupby(['Марка', 'НаимПродукции']).agg({
         'Количество': 'sum',
-        'Номер': lambda x: ', '.join(x.astype(str).unique()),
+        'Номер': lambda x: ', '.join(x.astype(str)),
         **{col: 'first' for col in df.columns if
            col not in ['Марка', 'НаимПродукции', 'Количество', 'Номер']}
     }).reset_index()

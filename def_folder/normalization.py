@@ -8,6 +8,7 @@ from def_folder import data_collection as col
 from def_folder.data_normalization import append_value
 
 NOT_SPECIFIED = 'Номер АоРПИ не определен!'
+NOT_SPECIFIED_DK = 'Номер ДК не определен!'
 
 def normalization_of_data_by_headers(table: list[dict], headers: dict, type_name: str|None = None) -> list[dict]:
 
@@ -103,11 +104,23 @@ def normalization_of_data_by_headers(table: list[dict], headers: dict, type_name
 
 def normalisation_par_type_de_fichier(table: list, type_file: str) -> list:
 
+    for row in table:
+        for key, value in row.items():
+            while '  ' in value:
+                value = value.replace('  ', ' ')
+                row[key] = value  # Заменяем старое значение в словаре новым
+
+
     if not type_file or not table:
         return table
 
     if 'АОРПИ Усть-Луга сопр.док.' in type_file:
         table[:] = [row for row in table if 'качестве стальных' in row.get('Тип док.', '+')]
+
+    if 'Документ о качестве' in type_file:
+        for row in table:
+            if row.get('Номер документа', NOT_SPECIFIED_DK) == "":
+                row['Номер документа'] = NOT_SPECIFIED_DK
 
     if 'Документ о качестве таблица' in type_file:
         table[:] = [row for row in table if row.get('Марка', '+') != '']

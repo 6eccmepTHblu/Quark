@@ -166,8 +166,10 @@ def get_data_by_headers(table, headers):
     date = []
     if table and headers:
         normal_headers, row_result = find_headers(table, headers)
+        for key, value in normal_headers.items():
+            if isinstance(value, list):
+                logging.warning(f'Не найдены заголовки - {key}!')
         if any(isinstance(value, list) and not value for value in normal_headers.values()):
-            logging.warning(f'Не найдены заголовки - {normal_headers}!')
             return date
 
         if normal_headers:

@@ -17,6 +17,7 @@ TEMPLATES = ['*КМД*.xls*']
 def get_data(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
+    logging.info('Сбор данных из КМД.')
     if file == '':
         logging.warning(f"Не найден файл КМД - '{TEMPLATES}'")
         return None
@@ -39,7 +40,7 @@ def get_data(path):
             row['Марка'] = norm.transliteration_ru_en(row['Марка']).upper().replace(" ", "")
             row['Наименование'] = norm.transliteration_ru_en(row['Наименование'], 'ru').lower()
 
-    logging.info('Данные из КМД собранны - ' + str(len(normal_data)) + '.')
+    logging.info('      Данные из КМД собранны - ' + str(len(normal_data)) + '.')
     return normal_data
 
 

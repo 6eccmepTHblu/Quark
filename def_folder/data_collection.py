@@ -228,6 +228,7 @@ def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = T
             data_list = [data_list]
 
         for data_dict in data_list:
+            logging.info(f'Сбор данных из {data_dict["Маска"]}.')
             data_csv = get_data_from_csv(path, data_dict['Маска'], data_dict['Заголовки'], data_dict.get('Отступ',1), type, norml)
 
             # Если необходимы табличные данные, то дабовляем их
@@ -244,6 +245,7 @@ def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = T
                     table_csv_name = table_csv
 
                 if table_csv_name != '':
+                    logging.info(f'Сбор данных из {table_csv_name}.')
                     table_type = FILES[table_csv_name]
                     data_table_csv = get_data_from_csv(path, table_type['Маска'], table_type['Заголовки'],
                                                        table_type.get('Отступ',1), table_csv_name, norml)
@@ -251,7 +253,7 @@ def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = T
                     data_csv = crossing_tables(data_table_csv, data_csv, 'СтраницаОбщая')
 
             # Если данные есть, вносим в общие данные
-            logging.info(f'Данные из {data_dict["Маска"]} - [{table_csv_name}] собранны - {str(len(data_csv))}')
+            logging.info(f'     Данные из {data_dict["Маска"]} - [{table_csv_name}] собранны - {str(len(data_csv))}')
             if data_csv:
                 all_data += data_csv
 

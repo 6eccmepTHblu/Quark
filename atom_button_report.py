@@ -16,7 +16,7 @@ from tkinter import simpledialog
 try:
     script, path = argv
 except:
-    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Авансовый 5'
+    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Авансовый 6'
 
 FAIL_NAME = os.path.join(path, "Отчет.xlsx")
 
@@ -51,7 +51,7 @@ def reconciles_documents_report():
                         f'@@@{row_2["Номер"]}@@{row_2["Дата"]}@@{row_2["Описание"]}@@{row_2["Сумма"]}@@@')
 
     # Дополнить данные для вывода
-    date_col_name = ['Дата 1', 'Дата 2', 'Дата 3']
+    date_col_name = ['Дата 1']
     for i, row in enumerate(data_report_result):
         row.setdefault('Дата поступления', date.today().strftime('%d.%m.%Y'))
         date_list = []

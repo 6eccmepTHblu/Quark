@@ -29,7 +29,7 @@ from data_output import (
 try:
     script, path = argv
 except:
-    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 7'
+    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 8'
 
 FAIL_NAME = os.path.join(path, "Акт промежуточной проверки.xlsx")
 
