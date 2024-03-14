@@ -20,6 +20,10 @@ def create_act_checking(path_act: str, number_aook: str, table: list[dict]):
     )
     vba_book.close()
 
+    if vba_macro == 0:
+        logging.warning(f"Не был сформирован лист Акт проверки.")
+        return
+
     # Заполняем таблицу данными
     wb = xl.load_workbook(path_act)
     sh = wb['Акт проверки']

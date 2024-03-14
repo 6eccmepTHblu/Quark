@@ -2,8 +2,8 @@ import logging
 
 from Class import Excel_styles as styles
 
-from def_folder.excel_collection import get_number_key_in_dict as get_key
-from def_folder.excel_collection import get_list_in_excel, enter_data_on_the_sheet
+from def_folder.data_collection import get_number_key_in_dict as get_key
+from def_folder.data_collection import get_list_in_excel, enter_data_on_the_sheet
 from def_folder.excel_style import (get_column_by_key as col,
                                     conditional_formatting as uf_color)
 

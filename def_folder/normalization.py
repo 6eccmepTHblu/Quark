@@ -1,10 +1,12 @@
 import os
-import pprint
 import re
 from fnmatch import fnmatch
 
-from def_folder import data_normalization as norm
-from def_folder import data_collection as col
+from def_folder.data_normalization import (transliteration_ru_en,
+                                           take_out_the_stamp,
+                                           get_date,
+                                           remove_side_values)
+from def_folder.csv import get_data_in_csv
 from def_folder.data_normalization import append_value
 
 NOT_SPECIFIED = 'Номер АоРПИ не определен!'
@@ -27,7 +29,7 @@ def normalization_of_data_by_headers(table: list[dict], headers: dict, type_name
             path_csv = path + 'normalization\\' + check + '.csv'
             normal_data = []
             if os.path.exists(path_csv):
-                normal_data = col.get_data_in_csv([path_csv], name=False, take_strio=False)
+                normal_data = get_data_in_csv([path_csv], name=False, take_strio=False)
 
             for row in table:
                 if key not in row:
@@ -35,36 +37,36 @@ def normalization_of_data_by_headers(table: list[dict], headers: dict, type_name
 
                 # Нормирование данных
                 if 'Номер' == check:
-                    row[key] = norm.transliteration_ru_en(row[key]).upper()
+                    row[key] = transliteration_ru_en(row[key]).upper()
 
                 elif 'НомерАоРПИ' == check:
                     if row[key] == '':
                         row[key] = row['Номер'] = NOT_SPECIFIED
 
                 elif 'Клеймо' == check:
-                    row['Клеймо'] = norm.transliteration_ru_en(row[key])
-                    row['Клеймо'] = norm.take_out_the_stamp(row['Клеймо'])
+                    row['Клеймо'] = transliteration_ru_en(row[key])
+                    row['Клеймо'] = take_out_the_stamp(row['Клеймо'])
 
                 elif 'Заключение' == check:
                     row[key] = row[key].lower()
 
                 elif 'Материал' == check:
-                    row[key] = norm.transliteration_ru_en(row[key]).upper()
+                    row[key] = transliteration_ru_en(row[key]).upper()
 
                 elif 'Марка' == check:
-                    row[key] = norm.transliteration_ru_en(row[key]).upper().replace(" ", "")
+                    row[key] = transliteration_ru_en(row[key]).upper().replace(" ", "")
 
                 elif 'НаимПродукции' == check:
-                    row[key] = norm.transliteration_ru_en(row[key], 'ru').lower()
+                    row[key] = transliteration_ru_en(row[key], 'ru').lower()
 
                 elif 'Дата' == check:
                     row[key] = row[key].replace(',', '.')
-                    row[key] = norm.get_date(row[key])
-                    row[key] = norm.remove_side_values(row[key])
+                    row[key] = get_date(row[key])
+                    row[key] = remove_side_values(row[key])
 
                 elif 'Количество' == check or 'Сумма' == check:
                     row[key] = re.sub(r'[^0-9.,]', '', row[key])
-                    row[key] = norm.remove_side_values(row[key])
+                    row[key] = remove_side_values(row[key])
 
                 # Замена данных по CSV
                 if normal_data:
@@ -106,7 +108,7 @@ def normalisation_par_type_de_fichier(table: list, type_file: str) -> list:
 
     for row in table:
         for key, value in row.items():
-            while '  ' in value:
+            while '  ' in str(value):
                 value = value.replace('  ', ' ')
                 row[key] = value  # Заменяем старое значение в словаре новым
 

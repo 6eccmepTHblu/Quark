@@ -4,7 +4,7 @@ import openpyxl
 
 from Class import Excel_styles as styles
 
-from def_folder.excel_collection import enter_data_on_the_sheet
+from def_folder.data_collection import enter_data_on_the_sheet
 from consts.colors import COLORS
 
 

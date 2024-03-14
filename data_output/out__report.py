@@ -1,5 +1,5 @@
 from Class import Excel_styles as styles
-from def_folder.excel_collection import get_list_in_excel, enter_data_on_the_sheet
+from def_folder.data_collection import get_list_in_excel, enter_data_on_the_sheet
 from consts.colors import COLORS
 from openpyxl.utils import get_column_letter as collumn
 

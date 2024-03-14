@@ -1,7 +1,7 @@
 import logging
-
 import pandas as pd
 import os
+
 from def_folder.data_normalization import (append_value as ap,
                                            create_hyperlink)
 
@@ -26,7 +26,8 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
 
     # Скрещивание строк по марке ДК
     df = pd.DataFrame(quardoc)
-    df['Количество'] = pd.to_numeric(df['Количество'], errors='coerce')
+    df['Количество'] = pd.to_numeric(df['Количество'], errors='coerce').fillna(0)
+    df['Количество'] = df['Количество'].astype(int)
     quardoc = df.groupby(['Марка', 'Наименование']).agg({
         'Количество': 'sum',
         'Номер документа': lambda x: ', '.join(x.astype(str)),
@@ -37,7 +38,8 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
 
     # Скрещивание строк по марке АоРПИ
     df = pd.DataFrame(aorpi_izdel)
-    df['Количество'] = pd.to_numeric(df['Количество'], errors='coerce')
+    df['Количество'] = pd.to_numeric(df['Количество'], errors='coerce').fillna(0)
+    df['Количество'] = df['Количество'].astype(int)
     aorpi_izdel = df.groupby(['Марка', 'НаимПродукции']).agg({
         'Количество': 'sum',
         'Номер': lambda x: ', '.join(x.astype(str)),
@@ -65,9 +67,12 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
         row_quardoc['Расхождения'] = []
         row_quardoc['Статус проверки'] = ''
         row_quardoc['Акт проверки'] = []
+        row_quardoc["Номер документа"] = ",".join(set(row_quardoc["Номер документа"].split(', ')))
         if row_quardoc['Марка АоРПИ']:
             row_izdel = aorpi_izdel[row_quardoc['Марка АоРПИ'][0]]  # Строка в таблице АоРПИ
             row_quardoc['Дата АоРПИ'] = row_izdel['Дата']
+
+            row_izdel["Номер"] = ",".join(set(row_izdel["Номер"].split(', ')))
 
             # Наименование
             if row_quardoc['Наименование'] != row_izdel['НаимПродукции']:
@@ -96,7 +101,11 @@ def reconciliation_data(quardoc: list, aorpi_izdel: list, aorpi_docum: list) -> 
             row_quardoc['Акт проверки'].append(
                 f'Указанная в документе о качестве №"{row_quardoc["Номер документа"]}" марка элемента "{row_quardoc["Марка"]}" не найдена в АоРПИ.')
 
-        row_quardoc['Номер документа'] = create_hyperlink(row_quardoc["ПутьФайла|"], row_quardoc['Файл'], row_quardoc['Номер документа'])
+
+        if len(row_quardoc['Номер документа']) < 250:
+            row_quardoc['Номер документа'] = create_hyperlink(row_quardoc["ПутьФайла|"], row_quardoc['Файл'], row_quardoc['Номер документа'])
+        else:
+            row_quardoc['Номер документа'] = row_quardoc['Номер документа']
 
         if row_quardoc['Статус проверки'] == '':
             row_quardoc['Статус проверки'] = STATUS['Полное совпадение']

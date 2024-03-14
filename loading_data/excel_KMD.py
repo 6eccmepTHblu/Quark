@@ -4,7 +4,6 @@ from fnmatch import fnmatch
 
 from def_folder import data_collection as fun
 from def_folder import data_normalization as norm
-from def_folder import excel_collection as excel
 from def_folder.normalization import normalization_of_data_by_headers
 
 HEADERS = {'Марка': ['*Отправочная марка*','*марка*', 'No сборки'],
@@ -23,7 +22,7 @@ def get_data(path):
         return None
 
     # Выбераем нужные столбцы, разбивая по словарю
-    all_data = excel.get_data_from_sheet(file, HEADERS)
+    all_data = fun.get_data_from_sheet(file, HEADERS)
 
     # Фильтруем данные
     filtered_date = norm.filter_data(all_data, 'Марка', ['', '*Отправочная марка*', '*Количество*'])
@@ -31,8 +30,8 @@ def get_data(path):
     # Нормализация данных по типу
     normal_data = normalization_of_data_by_headers(filtered_date, {'Вес общий': [1,'Вес']}, 'КМД')
 
-    normal_data[:] = [row for row in normal_data if not row['Марка'].lower() == 'марка']
-    normal_data[:] = [row for row in normal_data if not row['Марка'].lower() == 'итого']
+    normal_data[:] = [row for row in normal_data if not fnmatch(row['Марка'].lower(),'*марка*')]
+    normal_data[:] = [row for row in normal_data if not fnmatch(row['Марка'].lower(),'*итого*')]
 
     # Нормирование
     for row in normal_data:

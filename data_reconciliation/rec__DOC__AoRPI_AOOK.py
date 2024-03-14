@@ -16,7 +16,7 @@ def reconciliation_data(aorpi, aook, date_aook):
         logging.warning(f"Сверка документов АООК с АоРПИ не проведена! Данные по АоРПИ отсутствуют!")
         return None
 
-    if not aook:
+    if not aook or 'АоРПИ Номер из АООК' not in aook[0]:
         logging.warning(f"Сверка документов АООК с АоРПИ не проведена! Данные по АООК отсутствуют!")
         return None
 
@@ -32,9 +32,12 @@ def reconciliation_data(aorpi, aook, date_aook):
     )
 
     # Преобразуем даты в даты
-    data_itog['Дата АООК'] = pd.to_datetime(date_aook, dayfirst=True)
+    try:
+        data_itog['Дата АООК'] = pd.to_datetime(date_aook, dayfirst=True)
+        data_itog['_Дата АООК'] = pd.to_datetime(data_itog['Дата АООК'], format='%d.%m.%Y', errors='coerce')
+    except:
+        logging.warning(f"Не удалось обработать дату АООК/АОСР '{date_aook}'!")
     data_itog['_Дата'] = pd.to_datetime(data_itog['Дата'], format='%d.%m.%Y', errors='coerce')
-    data_itog['_Дата АООК'] = pd.to_datetime(data_itog['Дата АООК'], format='%d.%m.%Y', errors='coerce')
     data_itog['_АоРПИ Дата из АООК'] = pd.to_datetime(data_itog['АоРПИ Дата из АООК'], format='%d.%m.%Y',
                                                       errors='coerce')
 

@@ -5,7 +5,6 @@ import re
 
 from def_folder import data_collection as fun
 from def_folder import data_normalization as norm
-from def_folder import excel_collection as excel
 
 DATE_CELL = '*(дата составления акта)*'
 NUMBER_CELL = [['*освидетельствования строительных конструкций*', 2, 1],
@@ -22,9 +21,9 @@ HEADERS = {'Пункт': '№ п/п',
 def get_data(path, mask, type_name):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
-    logging.info('Сбор данных из АООК.')
+    logging.info('Сбор данных из АООК/АОСР.')
     if file == '':
-        logging.warning(f"Не найден файл АООК - '{TEMPLATES}'")
+        logging.warning(f"Не найден файл АООК/АОСР - '{TEMPLATES}'")
         return None
 
     # Открываем книгу АООК
@@ -34,10 +33,10 @@ def get_data(path, mask, type_name):
     reestr_aook = []
     for sh in wb:
         if fnmatch.fnmatch(sh.title.lower(), SHEET_REESTR):
-            all_data = excel.get_data_excel(sh)
+            all_data = fun.get_data_excel(sh)
 
             # Ищем нужные столбцы
-            headers, resul_rows = excel.find_headers(all_data, HEADERS)
+            headers, resul_rows = fun.find_headers(all_data, HEADERS)
 
             # Выбераем нужные столбцы, разбивая по словарю
             data = []
@@ -45,7 +44,7 @@ def get_data(path, mask, type_name):
                 row_data = {}
                 for key, item in headers.items():
                     if type(item) is list:
-                        logging.warning(f'Заголовок "{HEADERS[key]}" - не был найден в АООК!')
+                        logging.warning(f'Заголовок "{HEADERS[key]}" - не был найден в АООК/АОСР!')
                         return reestr_aook
                     row_data[key] = row[item]
                 data.append(row_data)
@@ -54,6 +53,7 @@ def get_data(path, mask, type_name):
             for row in data:
                 if fnmatch.fnmatch(str(row['ИД']).lower(), mask):
                     reestr_aook.append(row)
+            pass
 
     # Нормирование
     for row in reestr_aook:
@@ -73,7 +73,7 @@ def get_data(path, mask, type_name):
             nambe = delete_in_brackets(nambe)
             row[f'{type_name} Номер из АООК'] = nambe
 
-    logging.info('      Данные из АООК собранны - ' + str(len(reestr_aook)) + '.')
+    logging.info('      Данные из АООК/АОСР собранны - ' + str(len(reestr_aook)) + '.')
     return reestr_aook
 
 
@@ -88,14 +88,14 @@ def get_date(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
     if file == '':
-        logging.warning(f"Не найден файл АООК - '{TEMPLATES}'")
+        logging.warning(f"Не найден файл АООК/АОСР - '{TEMPLATES}'")
         return None
 
     # Открываем книгу АООК
     wb = openpyxl.load_workbook(file)
 
     # Находим дату АООК
-    sh = wb.sheetnames[0]
+    sh = wb[wb.sheetnames[0]]
     data_aook = ''
     for row in sh.iter_rows():
         for cell in row:
@@ -115,7 +115,7 @@ def get_date(path):
         data_aook = data_aook.split(' ')[0].strip()
     data_aook = norm.get_date(data_aook)
 
-    logging.info(f"Дата АООК: {data_aook}")
+    logging.info(f"Дата АООК/АОСР: {data_aook}")
     return data_aook
 
 
@@ -123,14 +123,14 @@ def get_number(path):
     # Найти файл
     file = fun.find_file(path, TEMPLATES)
     if file == '':
-        logging.warning(f"Не найден файл АООК - '{TEMPLATES}'")
+        logging.warning(f"Не найден файл АООК/АОСР - '{TEMPLATES}'")
         return None
 
     # Открываем книгу АООК
     wb = openpyxl.load_workbook(file)
 
     # Находим номер АООК
-    sh = wb.sheetnames[0]
+    sh = wb[wb.sheetnames[0]]
     number_aook = ''
     for row in sh.iter_rows():
         for cell in row:
@@ -142,7 +142,7 @@ def get_number(path):
             break
 
     # Нормируем дату АООК
-    logging.info(f"Номер АООК: {number_aook}")
+    logging.info(f"Номер АООК/АОСР: {number_aook}")
 
     return number_aook
 

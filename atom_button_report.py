@@ -16,7 +16,7 @@ from tkinter import simpledialog
 try:
     script, path = argv
 except:
-    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Авансовый 6'
+    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Авансовый'
 
 FAIL_NAME = os.path.join(path, "Отчет.xlsx")
 

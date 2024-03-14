@@ -16,7 +16,7 @@ def reconciliation_data(dk, aook, date_aook):
         logging.warning(f"Сверка документов ДК с АООК не проведена! Данные по ДК отсутствуют!")
         return None
 
-    if not aook:
+    if not aook or 'Качества Номер из АООК' not in aook[0]:
         logging.warning(f"Сверка документов ДК с АООК не проведена! Данные по АООК отсутствуют!")
         return None
 
@@ -36,9 +36,12 @@ def reconciliation_data(dk, aook, date_aook):
                                                   'Качества Дата из АООК'])
 
     # Преобразуем даты в даты
-    data_itog['Дата АООК'] = pd.to_datetime(date_aook, dayfirst=True)
+    try:
+        data_itog['Дата АООК'] = pd.to_datetime(date_aook, dayfirst=True)
+        data_itog['_Дата АООК'] = pd.to_datetime(data_itog['Дата АООК'], format='%d.%m.%Y', errors='coerce')
+    except:
+        logging.warning(f"Не удалось обработать дату АООК/АОСР '{date_aook}'!")
     data_itog['_Дата отгрузки'] = pd.to_datetime(data_itog['Дата отгрузки'], format='%d.%m.%Y', errors='coerce')
-    data_itog['_Дата АООК'] = pd.to_datetime(data_itog['Дата АООК'], format='%d.%m.%Y', errors='coerce')
     data_itog['_Качества Дата из АООК'] = pd.to_datetime(data_itog['Качества Дата из АООК'], format='%d.%m.%Y',
                                                          errors='coerce')
 

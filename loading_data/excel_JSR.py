@@ -6,7 +6,6 @@ import re
 
 from def_folder import data_collection as fun
 from def_folder import data_normalization as norm
-from def_folder import excel_collection as excel
 from def_folder import normalization
 
 TEMPLATES = ['*ЖСР*.xls*',
@@ -38,10 +37,10 @@ def get_data(path):
     reestr_jsr = []
     for sh in wb:
         if fnmatch.fnmatch(sh.title.lower(), SHEET_REESTR):
-            all_data = excel.get_data_excel(sh)
+            all_data = fun.get_data_excel(sh)
 
             # Ищем нужные столбцы
-            headers, resul_rows = excel.find_headers(all_data, HEADERS)
+            headers, resul_rows = fun.find_headers(all_data, HEADERS)
 
             # Выбераем нужные столбцы, разбивая по словарю
             data = []

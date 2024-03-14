@@ -1,6 +1,7 @@
 import logging
 import traceback
 import os
+import subprocess
 
 from sys import argv, exit
 from data_output.data_in_excel import main as xl
@@ -29,7 +30,7 @@ from data_output import (
 try:
     script, path = argv
 except:
-    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 8'
+    path = r'D:\Работа\Силенко Д.Т\Задача 2(Путхон - Кварк V2)\Данные 2'
 
 FAIL_NAME = os.path.join(path, "Акт промежуточной проверки.xlsx")
 
@@ -37,7 +38,14 @@ FAIL_NAME = os.path.join(path, "Акт промежуточной проверк
 def main():
     # Удаляем файл, если он етсь
     if os.path.exists(FAIL_NAME):
-        os.remove(FAIL_NAME)
+        try:
+            os.remove(FAIL_NAME)
+        except:
+            logging.warning(f"'Акт промежуточной проверки.xlsx' открыт, закройте файл и начните снова!")
+            return
+
+    # Загрузка данных для нормирования заголовков
+    fun.load_data()
 
     # Собираем данные
     all_data = {
@@ -133,3 +141,4 @@ if __name__ == "__main__":
         logging.error("====================================================================")
         logging.exception("Произошла ошибка: %s", str(ex))
         exit(1)
+    subprocess.Popen(['notepad.exe', path + '\\Лог работы скрипта.txt'])

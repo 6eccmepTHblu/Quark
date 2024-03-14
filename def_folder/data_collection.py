@@ -1,57 +1,31 @@
 import csv
 import glob
 import logging
+import openpyxl
 import os
 
 from datetime import datetime
 from fnmatch import fnmatch
 from consts.files import FILES
-from def_folder.excel_collection import find_headers
 from def_folder.normalization import (normalisation_par_type_de_fichier,
                                       normalization_of_data_by_headers)
+from openpyxl.comments import Comment
+from openpyxl.worksheet.worksheet import Worksheet
+from def_folder.data_normalization import transliteration_ru_en
+from def_folder.csv import get_data_in_csv
+
+# Глобальные переменные для хранения данных нормирования заголовков
+loaded_data = []
 
 
-def get_data_in_csv(list_csv: list, name: bool = True, take_strio: bool = True) -> list:
-    """
-    **Функция `get_data_in_csv`**
-    Эта функция считывает данные из файлов CSV, объединяет их в список и возвращает полученные данные.
+def load_data():
+    global loaded_data
 
-    **Параметры**
-    - `list_csv` (список): Список имен файлов CSV для чтения данных.
-    - `name` (булево значение): Если установлено в `True`, добавляет в начало списка имя файла.
-            По умолчанию установлено в `True`.
+    path = os.path.abspath(__file__).replace(os.path.basename(__file__), '')
+    path_csv = os.path.join(path, 'normalization', '_ЗАГОЛОВКИ.csv')
+    if os.path.exists(path_csv):
+        loaded_data = get_data_in_csv([path_csv], name=False, take_strio=False)
 
-    **Возвращаемое значение**
-    - `element_list` (список): Список списков, представляющих данные из файлов CSV.
-            Если `name` установлено в `True`, каждый подсписок начинается с имени файла.
-
-    **Пример использования**
-    csv_files = ["file1.csv", "file2.csv"]
-    data_list = get_data_in_csv(csv_files, indent=2, name=True)
-    """
-    element_list = []
-    if not list_csv:
-        return element_list
-
-    for file_name in list_csv:
-        if not os.path.exists(file_name):
-            print(f"Файл не существует: {file_name}")
-            continue
-
-        with open(file_name) as my_file:
-            try:
-                file_contents = csv.reader(my_file, delimiter=';')
-                if take_strio:
-                    temp_list = [[str(cell).strip() for cell in row] for row in file_contents]
-                else:
-                    temp_list = [[str(cell) for cell in row] for row in file_contents]
-                if name:  # Если name = True, добавляет в начало списка имя файла
-                    temp_list = [row + [file_name]  for row in temp_list]
-                element_list.extend(temp_list[:])
-            except csv.Error as e:
-                print(f"Ошибка при чтении файла {file_name}: {e}")
-
-    return element_list
 
 def find_file(path: str, templates: list[str]) -> str:
     """
@@ -77,6 +51,7 @@ def find_file(path: str, templates: list[str]) -> str:
 
     return ''
 
+
 def get_list_files(path: str, templates: list[str]) -> list[str]:
     """
         **Функция `get_list_files`**
@@ -101,7 +76,9 @@ def get_list_files(path: str, templates: list[str]) -> list[str]:
 
     return list_files
 
-def separate_collumns_of_headers(all_data: list[list], headers: dict, group: str, path: bool='True') -> list[list]:
+
+def separate_collumns_of_headers(all_data: list[list], headers: dict, group: str, path: bool = 'True', file='') -> list[
+    list]:
     """
     **Функция `separate_collumns_of_headers`**
     Эта функция создает список словарей, представляющих собой выбранные столбцы данных из каждой строки `all_data`
@@ -145,7 +122,7 @@ def separate_collumns_of_headers(all_data: list[list], headers: dict, group: str
                     item, _ = find_headers(all_data, {"name": item})
                     item = item["name"]
                     if isinstance(item, list):
-                        logging.warning(f'Не найдены заголовки - "{hed}" в "{group}"!')
+                        logging.warning(f'Не найдены заголовки - "{hed}" в "{group}" - "{file}"!')
                         return []
                 temp_dict[key] = row[item] if len(row) > item else ''
             except IndexError:
@@ -155,6 +132,7 @@ def separate_collumns_of_headers(all_data: list[list], headers: dict, group: str
         if temp_dict:
             data.append(temp_dict)
     return data
+
 
 def crossing_tables(table_1: list[dict], table_2: list[dict], header: str) -> list[dict]:
     """
@@ -188,6 +166,7 @@ def crossing_tables(table_1: list[dict], table_2: list[dict], header: str) -> li
                 break
     return table_1
 
+
 def pull_out_the_page_namber(data: list[dict]) -> list[dict]:
     """
     **Функция `pull_out_the_page_number`**
@@ -212,7 +191,8 @@ def pull_out_the_page_namber(data: list[dict]) -> list[dict]:
                 row['СтраницаОбщая'] = page_number
     return data
 
-def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = True) -> list:
+
+def collects_data_by_type(path: str, types: list, table_csv: str = '', norml=True) -> list:
     all_data = []
     if not path or not types:
         return all_data
@@ -229,7 +209,8 @@ def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = T
 
         for data_dict in data_list:
             logging.info(f'Сбор данных из {data_dict["Маска"]}.')
-            data_csv = get_data_from_csv(path, data_dict['Маска'], data_dict['Заголовки'], data_dict.get('Отступ',1), type, norml)
+            data_csv = get_data_from_csv(path, data_dict['Маска'], data_dict['Заголовки'], data_dict.get('Отступ', 1),
+                                         type, norml)
 
             # Если необходимы табличные данные, то дабовляем их
             table_csv_name = ''
@@ -248,8 +229,9 @@ def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = T
                     logging.info(f'Сбор данных из {table_csv_name}.')
                     table_type = FILES[table_csv_name]
                     data_table_csv = get_data_from_csv(path, table_type['Маска'], table_type['Заголовки'],
-                                                       table_type.get('Отступ',1), table_csv_name, norml)
-                    data_table_csv = pull_out_the_page_namber(data_table_csv)  # Вытаскиваем номер страницы из имени файла
+                                                       table_type.get('Отступ', 1), table_csv_name, norml)
+                    data_table_csv = pull_out_the_page_namber(
+                        data_table_csv)  # Вытаскиваем номер страницы из имени файла
                     data_csv = crossing_tables(data_table_csv, data_csv, 'СтраницаОбщая')
 
             # Если данные есть, вносим в общие данные
@@ -259,23 +241,26 @@ def collects_data_by_type(path: str, types: list, table_csv: str = '', norml = T
 
     return all_data
 
+
 def get_data_from_csv(path, masks, headers, indent, group, norml):
     # Получаем список файлов
     list_files = get_list_files(path, masks)
 
     # Собираем все данные из выбранных файлов
-    all_data = get_data_in_csv(list_files)
+    data_all = []
+    for file in list_files:
+        total_data = get_data_in_csv(file)
 
-    # Выбераем нужные столбцы, разбивая по словарю
-    data = separate_collumns_of_headers(all_data, headers, group)
-    data = data[indent:]
+        # Выбераем нужные столбцы, разбивая по словарю
+        data = separate_collumns_of_headers(total_data, headers, group, file=file)
+        data_all.extend(data[indent:])
 
     # Нормализация данных по типу
     if norml:
-        data = normalisation_par_type_de_fichier(data, group)
+        data_all = normalisation_par_type_de_fichier(data_all, group)
 
     # Нормализация данных по заголовкам
-    normal_data = normalization_of_data_by_headers(data, headers, group)
+    normal_data = normalization_of_data_by_headers(data_all, headers, group)
 
     # Убераем пробелы по бокам
     for row in normal_data:
@@ -283,8 +268,8 @@ def get_data_from_csv(path, masks, headers, indent, group, norml):
             if isinstance(value, str):
                 row[key] = value.strip()
 
-
     return normal_data
+
 
 def output_data_to_csv(path, table, name):
     if path and table and name:
@@ -327,7 +312,7 @@ def checks_dates(date_1: str, date_2: str, type_check: str = '!=') -> bool:
     else:
         if type_check == '==' and date_1 == date_2:
             return True
-        elif type_check == '!=' and  date_1 != date_2:
+        elif type_check == '!=' and date_1 != date_2:
             return True
         elif type_check == '<' and date_1 < date_2:
             return True
@@ -340,7 +325,8 @@ def checks_dates(date_1: str, date_2: str, type_check: str = '!=') -> bool:
 
     return False
 
-def types_date(date: str) -> str|datetime:
+
+def types_date(date: str) -> str | datetime:
     if date == '':
         return ''
 
@@ -348,6 +334,7 @@ def types_date(date: str) -> str|datetime:
         return datetime.strptime(date, '%d.%m.%Y')
     except Exception as _:
         return date
+
 
 def sums_rows_by_keys(table: list[dict], keys: list[str], keys_sum: list[str]) -> list[dict]:
     if not table or not keys and not keys_sum:
@@ -377,7 +364,7 @@ def sums_rows_by_keys(table: list[dict], keys: list[str], keys_sum: list[str]) -
                 if result_sum:
                     if number == -1:
                         all_data.extend([row])
-                        number = len(all_data)-1
+                        number = len(all_data) - 1
                     else:
                         for key_sum in keys_sum:
                             all_data[number][key_sum] = float(all_data[number][key_sum]) + float(row[key_sum])
@@ -385,3 +372,211 @@ def sums_rows_by_keys(table: list[dict], keys: list[str], keys_sum: list[str]) -
                 else:
                     all_data.extend([row])
     return all_data
+
+
+def enter_data_on_the_sheet(table: list, headers: dict, sheet: Worksheet, com_add: bool = True, c1: int = 0) -> None:
+    """
+        **Функция `enter_data_on_the_sheet`**
+
+        Эта функция заполняет лист Excel данными из переданной таблицы, используя заголовки,
+        определенные в словаре `headers`. Если в данных есть поле 'Расхождения',
+        то создаются комментарии и добавляются к соответствующим ячейкам.
+
+        **Параметры**
+        - `table` (список): Таблица данных для заполнения в формате списка словарей.
+        - `headers` (словарь): Словарь заголовков, где ключи - это названия полей, а значения - описания.
+        - `sheet` (объект листа Excel): Лист Excel, на который нужно внести данные.
+        - `com_add` (булиан): Опредиляет, нужно ли добовлять комментарии.
+
+        **Возвращаемое значение**
+        - `None`: Функция не возвращает значения, но изменяет переданный лист Excel.
+
+        **Пример использования**
+            data_table = [
+                {"Name": "John", "Age": 30, "Расхождения": [{"Преф": "Diff", "Рез": 5, "Тип": "Age"}]},
+                {"Name": "Alice", "Age": 25},
+                # ...
+            ]
+            headers_info = {"Name": "Имя пользователя", "Age": "Возраст"}
+            enter_data_on_the_sheet(data_table, headers_info, excel_sheet)
+    """
+    if not isinstance(table, list):
+        return None
+
+    if c1 != 0:
+        c1 -= 1
+
+    table.insert(0, headers)  # Вставляем заголовки в начало таблицы
+    for i, row_data in enumerate(table, start=1):
+        for j, key in enumerate(headers, start=1):
+            sheet.cell(row=i, column=c1 + j, value=str(row_data.get(key, '')))
+        if com_add and 'Расхождения' in row_data:  # Добавляем комментарии на лист если они есть
+            for com in row_data['Расхождения']:
+                comment = Comment(com['Преф'] + str(com['Рез']), 'Я', 100, 350)
+                coll_num = get_number_key_in_dict(headers, com['Тип'])
+                if coll_num:
+                    sheet.cell(row=i, column=c1 + get_number_key_in_dict(headers, com['Тип'])).comment = comment
+
+
+def get_list_in_excel(file_name: str, sheet_name: str, create_workbook: bool = False, one_sheet: bool = False) -> tuple:
+    """
+        **Функция `get_list_in_excel`**
+
+        Эта функция открывает файл Excel и возвращает рабочую книгу и лист. Если файл не существует, и установлен флаг
+            `create_workbook`, то создается новая книга.
+
+        **Параметры**
+        - `file_name` (строка): Имя файла Excel.
+        - `sheet_name` (строка): Имя листа Excel.
+        - `create_workbook` (булево): Флаг для создания новой книги, если файл не существует.
+            По умолчанию установлен в `True`.
+
+        **Возвращаемое значение**
+        - Кортеж из двух элементов:
+          - `wb` (рабочая книга): Объект рабочей книги Excel.
+          - `sh` (лист Excel): Объект листа Excel.
+
+        **Пример использования**
+        workbook, sheet = get_list_in_excel("example.xlsx", "Sheet1")
+    """
+
+    if create_workbook or not os.path.exists(file_name):
+        wb = openpyxl.Workbook()
+    else:
+        wb = openpyxl.load_workbook(file_name)
+
+    if one_sheet:
+        for sh in wb:
+            if sh.title == sheet_name:
+                return wb, sh
+        sh = wb.create_sheet(sheet_name)
+        return wb, sh
+
+    if len(wb.worksheets) == 1:
+        sh = wb.active
+        if sh.title == 'Sheet':
+            sh.title = sheet_name
+        else:
+            sh = wb.create_sheet(sheet_name)
+        return wb, sh
+
+    if sheet_name in wb.sheetnames:
+        wb.remove(wb[sheet_name])
+    sh = wb.create_sheet(sheet_name)
+
+    return wb, sh
+
+
+def get_number_key_in_dict(dict, key):
+    for i, item in enumerate(dict):
+        if item == key:
+            return i + 1
+    return 0
+
+
+def find_sheet(workbook, mask_name):
+    sheets = []
+    if workbook and mask_name:
+        for sheet in workbook:
+            if fnmatch(sheet.title, mask_name):
+                sheets.append(sheet.title)
+    return sheets
+
+
+def get_data_excel(sheet):
+    all_data = []
+    if sheet:
+        for row in sheet.iter_rows():
+            filtered_row = []
+            data = False
+            for cell in row:
+                text = cell.value
+                if text is None:
+                    text = ''
+                filtered_row.append(str(text).strip())
+                if cell.value is not None and cell.value != '':
+                    data = True
+            if data:
+                all_data.append(filtered_row)
+    return all_data
+
+
+def find_headers(table, headers):
+    result_headers = {}
+    if table and headers:
+        numbe_row = []
+        for key, items in headers.items():
+            if not type(items) is list:
+                items = [items]
+            result_headers[key] = []
+            for item in items:
+                item = normalizes_headings(item)
+                item = transliteration_ru_en(item, 'ru')
+                if not str(item).isdigit():
+                    for j, row in enumerate(table):
+                        for i, cell in enumerate(row):
+                            cell = normalizes_headings(cell)
+                            cell = transliteration_ru_en(cell, 'ru')
+                            if fnmatch(str(cell).lower(), item.lower()):
+                                result_headers[key] = i
+                                numbe_row.append(j)
+                                break
+                        if str(result_headers[key]).isdigit():
+                            break
+                if str(result_headers[key]).isdigit():
+                    break
+        if numbe_row:
+            numbe_row = min(numbe_row)
+        else:
+            numbe_row = 0
+    return result_headers, numbe_row
+
+
+def get_data_by_headers(table, headers):
+    date = []
+    if table and headers:
+        normal_headers, row_result = find_headers(table, headers)
+        for key, value in normal_headers.items():
+            if isinstance(value, list):
+                logging.warning(f'Не найдены заголовки - {key}!')
+        if any(isinstance(value, list) and not value for value in normal_headers.values()):
+            return date
+
+        if normal_headers:
+            for row in table[row_result:]:
+                row_data = {}
+                for key, item in normal_headers.items():
+                    if isinstance(item, int) and len(row) > item:
+                        row_data[key] = row[item]
+                if row_data:
+                    date.append(row_data)
+    return date
+
+
+def get_data_from_sheet(path, headers, sheet=0):
+    data = []
+    if path and headers:
+        workbook = openpyxl.load_workbook(path, data_only=True)  # Читаем Excel
+
+        # Находим лист в книге
+        if str(sheet).isdigit():
+            sh = workbook.worksheets[sheet]
+        else:
+            sheet_name = find_sheet(workbook, sheet)
+            if not sheet_name:
+                return data
+            sh = sheet_name[0]
+
+        all_data = get_data_excel(sh)  # Получаем данные с листа
+        data = get_data_by_headers(all_data, headers)  # Оставить только указанные заголовки
+
+        workbook.close()  # Закрыть книгу
+    return data
+
+
+def normalizes_headings(header):
+    if isinstance(header, str):
+        for row in loaded_data:
+            if len(row) == 2:
+                header = header.replace(row[0], row[1])
+    return header
